@@ -13,7 +13,7 @@ describe("cn utility", () => {
 
   it("should handle arrays and objects", () => {
     expect(cn(["base", "extra"], { active: true, inactive: false })).toBe(
-      "base extra active"
+      "base extra active",
     );
   });
 });
