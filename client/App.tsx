@@ -7,12 +7,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import Dashboard from "./pages/Dashboard";
-import DashboardLayout from "./components/DashboardLayout";
-import PlaceholderPage from "./components/PlaceholderPage";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import DashboardLayout from "./components/DashboardLayout.jsx";
+import PlaceholderPage from "./components/PlaceholderPage.jsx";
 import NotFound from "./pages/NotFound";
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
