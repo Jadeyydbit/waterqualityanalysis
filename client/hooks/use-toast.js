@@ -3,6 +3,13 @@ import * as React from "react";
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+};
+
 let count = 0;
 
 function genId() {
@@ -40,7 +47,7 @@ export const reducer = (state, action) => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
+          t.id === action.toast.id ? { ...t, ...action.toast } : t,
         ),
       };
 
@@ -63,7 +70,7 @@ export const reducer = (state, action) => {
                 ...t,
                 open: false,
               }
-            : t
+            : t,
         ),
       };
     }
@@ -92,7 +99,7 @@ function dispatch(action) {
   });
 }
 
-export function toast({ ...props }) {
+function toast({ ...props }) {
   const id = genId();
 
   const update = (props) =>
@@ -121,7 +128,7 @@ export function toast({ ...props }) {
   };
 }
 
-export function useToast() {
+function useToast() {
   const [state, setState] = React.useState(memoryState);
 
   React.useEffect(() => {
@@ -140,3 +147,5 @@ export function useToast() {
     dismiss: (toastId) => dispatch({ type: "DISMISS_TOAST", toastId }),
   };
 }
+
+export { useToast, toast };
