@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@/components/ui/visually-hidden";
+import { VisuallyHidden } from "@/components/ui/visually-hidden.jsx";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
