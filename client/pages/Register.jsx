@@ -3,7 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { OtpInput } from "@/components/ui/otp-input";
 import { Waves, Droplets, AlertCircle, ArrowLeft, Mail } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +22,7 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [otpValue, setOtpValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,9 +30,9 @@ export default function Register() {
   const [resendLoading, setResendLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
     setError("");
   };
@@ -51,7 +58,7 @@ export default function Register() {
       console.log("Register attempt:", formData);
 
       // Simulate API call to register user and send OTP
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Move to OTP verification step
       setCurrentStep("otp");
@@ -76,7 +83,7 @@ export default function Register() {
       console.log("OTP verification:", otpValue);
 
       // Simulate API call to verify OTP
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // For demo purposes, accept any 6-digit OTP
       // In real implementation, verify against backend
@@ -102,7 +109,7 @@ export default function Register() {
       console.log("Resending OTP to:", formData.email);
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setResendLoading(false);
     } catch (err) {
@@ -124,8 +131,12 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Waves className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">River Monitor</h1>
-          <p className="text-gray-600">Join us in protecting our water resources</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            River Monitor
+          </h1>
+          <p className="text-gray-600">
+            Join us in protecting our water resources
+          </p>
         </div>
 
         <Card className="w-full shadow-lg">
@@ -133,7 +144,9 @@ export default function Register() {
             // Signup Form
             <>
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">Create account</CardTitle>
+                <CardTitle className="text-2xl text-center">
+                  Create account
+                </CardTitle>
                 <CardDescription className="text-center">
                   Sign up to start monitoring water quality in your area
                 </CardDescription>
@@ -222,7 +235,10 @@ export default function Register() {
               <CardFooter className="text-center">
                 <p className="text-sm text-gray-600 w-full">
                   Already have an account?{" "}
-                  <Link to="/login" className="text-primary hover:underline font-medium">
+                  <Link
+                    to="/login"
+                    className="text-primary hover:underline font-medium"
+                  >
                     Sign in
                   </Link>
                 </p>
@@ -237,10 +253,15 @@ export default function Register() {
                     <Mail className="w-8 h-8 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl text-center">Verify your email</CardTitle>
+                <CardTitle className="text-2xl text-center">
+                  Verify your email
+                </CardTitle>
                 <CardDescription className="text-center">
-                  We've sent a 6-digit verification code to<br />
-                  <span className="font-medium text-foreground">{formData.email}</span>
+                  We've sent a 6-digit verification code to
+                  <br />
+                  <span className="font-medium text-foreground">
+                    {formData.email}
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -252,7 +273,9 @@ export default function Register() {
                 )}
 
                 <div className="space-y-4">
-                  <Label className="text-center block">Enter verification code</Label>
+                  <Label className="text-center block">
+                    Enter verification code
+                  </Label>
                   <OtpInput
                     length={6}
                     value={otpValue}
