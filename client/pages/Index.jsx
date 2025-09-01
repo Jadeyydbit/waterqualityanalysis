@@ -1,5 +1,5 @@
 // client/index.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import "../global.css";
 
@@ -114,9 +114,8 @@ const App = () => (
 );
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
 export default function Index() {
-<<<<<<< HEAD
-=======
   const [exampleFromServer, setExampleFromServer] = useState("");
 
   useEffect(() => {
@@ -133,11 +132,13 @@ export default function Index() {
     }
   };
 
->>>>>>> 7db7923 (Added Maps feature with MithiRiverMap and updated config)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-3xl font-bold text-blue-600">Welcome to River Monitor</h1>
       <p className="text-gray-600 mt-2">Track and protect our rivers.</p>
+      {exampleFromServer && (
+        <p className="mt-2 text-green-600">Server says: {exampleFromServer}</p>
+      )}
     </div>
   );
 }
