@@ -21,8 +21,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^1.11.0",
     "body-parser": "^1.20.3",
+=======
+    "@react-google-maps/api": "^2.20.7",
+>>>>>>> 7db7923 (Added Maps feature with MithiRiverMap and updated config)
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "firebase": "^12.2.1",

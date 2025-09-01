@@ -115,6 +115,25 @@ const App = () => (
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 export default function Index() {
+<<<<<<< HEAD
+=======
+  const [exampleFromServer, setExampleFromServer] = useState("");
+
+  useEffect(() => {
+    fetchDemo();
+  }, []);
+
+  const fetchDemo = async () => {
+    try {
+      const response = await fetch("/api/demo");
+      const data = await response.json();
+      setExampleFromServer(data.message);
+    } catch (error) {
+      console.error("Error fetching demo:", error);
+    }
+  };
+
+>>>>>>> 7db7923 (Added Maps feature with MithiRiverMap and updated config)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-3xl font-bold text-blue-600">Welcome to River Monitor</h1>
