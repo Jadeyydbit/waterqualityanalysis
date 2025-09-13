@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
+import RiverDetails from "./pages/RiverDetails";
 import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,11 @@ const App = () => (
           <Route path="/dashboard" element={
             <DashboardLayout>
               <Dashboard />
+            </DashboardLayout>
+          } />
+          <Route path="/dashboard/rivers/:slug" element={
+            <DashboardLayout>
+              <RiverDetails />
             </DashboardLayout>
           } />
           <Route path="/dashboard/reports" element={
