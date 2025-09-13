@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
       "/api": "http://127.0.0.1:5000", // 🔑 This is the key line for forwarding API calls
     },
     fs: {
-      allow: ["./client", "./shared"],
+      allow: ["./client", "./shared","./",],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
   },
