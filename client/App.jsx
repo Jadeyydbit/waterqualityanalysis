@@ -12,6 +12,8 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import RiverDetails from "./pages/RiverDetails";
+import Admin from "./pages/Admin";
+import AddRiver from "./pages/AddRiver";
 import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
@@ -80,11 +82,12 @@ const App = () => (
           } />
           <Route path="/dashboard/admin" element={
             <DashboardLayout>
-              <PlaceholderPage
-                title="Admin Dashboard"
-                description="Manage users and moderate pollution reports."
-                icon={<Users className="w-8 h-8 text-muted-foreground" />}
-              />
+              <Admin />
+            </DashboardLayout>
+          } />
+          <Route path="/dashboard/admin/rivers/new" element={
+            <DashboardLayout>
+              <AddRiver />
             </DashboardLayout>
           } />
 
