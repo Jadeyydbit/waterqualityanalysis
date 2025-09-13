@@ -23,6 +23,10 @@ export default function Login() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
+      try {
+        const role = /admin/i.test(email) ? "admin" : "user";
+        localStorage.setItem("role", role);
+      } catch (e) {}
       // Redirect to dashboard on success
       window.location.href = "/dashboard";
     }, 1000);

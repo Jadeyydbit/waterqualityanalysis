@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getRivers } from "@/lib/rivers";
 import {
   Droplets,
   Thermometer,
@@ -14,56 +15,7 @@ import {
   Clock
 } from "lucide-react";
 
-const waterQualityData = [
-  {
-    id: 1,
-    slug: "mithi",
-    location: "Mithi River",
-    wqi: 48,
-    status: "Moderate",
-    ph: 7.1,
-    oxygen: 4.5,
-    temperature: 27,
-    turbidity: 62,
-    trend: "down"
-  },
-  {
-    id: 2,
-    slug: "godavari",
-    location: "Godavari",
-    wqi: 72,
-    status: "Good",
-    ph: 7.4,
-    oxygen: 7.9,
-    temperature: 25,
-    turbidity: 30,
-    trend: "up"
-  },
-  {
-    id: 3,
-    slug: "krishna",
-    location: "Krishna",
-    wqi: 66,
-    status: "Moderate",
-    ph: 7.0,
-    oxygen: 6.2,
-    temperature: 24,
-    turbidity: 40,
-    trend: "up"
-  },
-  {
-    id: 4,
-    slug: "tapi",
-    location: "Tapi",
-    wqi: 58,
-    status: "Moderate",
-    ph: 7.3,
-    oxygen: 5.6,
-    temperature: 26,
-    turbidity: 50,
-    trend: "down"
-  }
-];
+// Rivers are loaded from localStorage so admin add/delete reflects here
 
 const alerts = [
   {
@@ -126,11 +78,20 @@ function getAlertVariant(type) {
 
 export default function Dashboard() {
   const [visibleAlerts, setVisibleAlerts] = useState([]);
+  const [rivers, setRivers] = useState([]);
 
   useEffect(() => {
     const shuffled = [...alerts].sort(() => Math.random() - 0.5);
     setVisibleAlerts(shuffled.slice(0, 2));
+    setRivers(getRivers());
   }, []);
+
+  const avgWqi = useMemo(() => {
+    if (!rivers.length) return 0;
+    return Math.round(
+      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length
+    );
+  }, [rivers]);
 
   return (
     <div className="p-6 space-y-6">
@@ -144,10 +105,8 @@ export default function Dashboard() {
             <Droplets className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">57.5</div>
-            <p className="text-xs text-muted-foreground">
-              +2.1% from last month
-            </p>
+            <div className="text-2xl font-bold">{avgWqi}</div>
+            <p className="text-xs text-muted-foreground">Average across rivers</p>
           </CardContent>
         </Card>
         
@@ -159,10 +118,8 @@ export default function Dashboard() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">
-              Active monitoring locations
-            </p>
+            <div className="text-2xl font-bold">{rivers.length}</div>
+            <p className="text-xs text-muted-foreground">Active rivers</p>
           </CardContent>
         </Card>
         
@@ -174,10 +131,8 @@ export default function Dashboard() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">
-              Requires immediate attention
-            </p>
+            <div className="text-2xl font-bold">{visibleAlerts.length}</div>
+            <p className="text-xs text-muted-foreground">Active alerts shown</p>
           </CardContent>
         </Card>
         
@@ -223,8 +178,8 @@ export default function Dashboard() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Water Quality Index by Location</h2>
         <div className="grid gap-6 md:grid-cols-2">
-          {waterQualityData.map((data) => (
-            <Card key={data.id} className="relative">
+          {rivers.map((data) => (
+            <Card key={data.slug} className="relative">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{data.location}</CardTitle>
