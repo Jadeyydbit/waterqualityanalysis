@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { GoogleMap, LoadScript, Polyline, InfoWindow } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  LoadScript,
+  Polyline,
+  InfoWindow,
+} from "@react-google-maps/api";
 
 const containerStyle = {
   width: "100%",
@@ -9,15 +14,15 @@ const containerStyle = {
 
 // River path
 const mithiRiverPath = [
-  { lat: 19.120, lng: 72.880 },
+  { lat: 19.12, lng: 72.88 },
   { lat: 19.115, lng: 72.875 },
-  { lat: 19.110, lng: 72.870 },
+  { lat: 19.11, lng: 72.87 },
   { lat: 19.105, lng: 72.865 },
-  { lat: 19.100, lng: 72.860 },
+  { lat: 19.1, lng: 72.86 },
   { lat: 19.095, lng: 72.855 },
-  { lat: 19.090, lng: 72.850 },
+  { lat: 19.09, lng: 72.85 },
   { lat: 19.085, lng: 72.848 },
-  { lat: 19.080, lng: 72.845 },
+  { lat: 19.08, lng: 72.845 },
   { lat: 19.075, lng: 72.842 },
 ];
 
@@ -26,9 +31,21 @@ const mapStyle = [
   { elementType: "geometry", stylers: [{ color: "#1e1e2f" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#1e1e2f" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f4c81" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c2c3c" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2c2c3c" }] },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#0f4c81" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#2c2c3c" }],
+  },
+  {
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [{ color: "#2c2c3c" }],
+  },
 ];
 
 export default function Maps() {

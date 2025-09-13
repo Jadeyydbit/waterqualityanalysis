@@ -2,45 +2,52 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { 
-  Waves, 
-  Home, 
-  FileText, 
-  Map, 
-  Calendar, 
-  Newspaper, 
-  Settings, 
-  LogOut, 
+import {
+  Waves,
+  Home,
+  FileText,
+  Map,
+  Calendar,
+  Newspaper,
+  Settings,
+  LogOut,
   Menu,
   Sun,
   Moon,
-  Users
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
+const baseNavigation = [
   { name: "Home", href: "/dashboard", icon: Home },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Maps", href: "/dashboard/maps", icon: Map },
   { name: "Cleanup Drives", href: "/dashboard/cleanup", icon: Calendar },
   { name: "Blog & News", href: "/dashboard/news", icon: Newspaper },
-  { name: "Admin", href: "/dashboard/admin", icon: Users },
 ];
 
 export default function DashboardLayout({ children }) {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [role, setRole] = useState(
+    () => localStorage.getItem("role") || "user",
+  );
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -48,7 +55,9 @@ export default function DashboardLayout({ children }) {
   };
 
   const handleLogout = () => {
-    // TODO: Connect to backend API for logout
+    try {
+      localStorage.removeItem("role");
+    } catch (e) {}
     window.location.href = "/login";
   };
 
@@ -60,9 +69,14 @@ export default function DashboardLayout({ children }) {
         </div>
         <span className="font-bold text-lg">River Monitor</span>
       </div>
-      
+
       <nav className="flex-1 px-4 py-6 space-y-2">
-        {navigation.map((item) => {
+        {[
+          ...baseNavigation,
+          ...(role === "admin"
+            ? [{ name: "Admin", href: "/dashboard/admin", icon: Users }]
+            : []),
+        ].map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <Link
@@ -70,9 +84,9 @@ export default function DashboardLayout({ children }) {
               to={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-white" 
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+                isActive
+                  ? "bg-primary text-white"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800",
               )}
               onClick={() => setSidebarOpen(false)}
             >
@@ -82,10 +96,10 @@ export default function DashboardLayout({ children }) {
           );
         })}
       </nav>
-      
+
       <div className="p-4 border-t">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-start gap-3"
           onClick={handleLogout}
         >
@@ -121,9 +135,9 @@ export default function DashboardLayout({ children }) {
             <div className="flex items-center gap-4">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="lg:hidden"
                     onClick={() => setSidebarOpen(true)}
                   >
@@ -131,7 +145,7 @@ export default function DashboardLayout({ children }) {
                   </Button>
                 </SheetTrigger>
               </Sheet>
-              
+
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Water Quality Dashboard
               </h1>
@@ -153,7 +167,10 @@ export default function DashboardLayout({ children }) {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt="User" />
                       <AvatarFallback>JD</AvatarFallback>
@@ -163,7 +180,9 @@ export default function DashboardLayout({ children }) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">John Doe</p>
+                      <p className="text-sm font-medium leading-none">
+                        John Doe
+                      </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         john@example.com
                       </p>
@@ -185,9 +204,7 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

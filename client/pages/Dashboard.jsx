@@ -1,87 +1,57 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Droplets, 
-  Thermometer, 
-  Zap, 
-  AlertTriangle, 
-  TrendingUp, 
+import { getRivers } from "@/lib/rivers";
+import {
+  Droplets,
+  Thermometer,
+  Zap,
+  AlertTriangle,
+  TrendingUp,
   TrendingDown,
   MapPin,
-  Clock
+  Clock,
 } from "lucide-react";
 
-const waterQualityData = [
-  {
-    id: 1,
-    location: "Ganges River - Varanasi",
-    wqi: 65,
-    status: "Moderate",
-    ph: 7.2,
-    oxygen: 6.8,
-    temperature: 24,
-    turbidity: 45,
-    trend: "up"
-  },
-  {
-    id: 2,
-    location: "Yamuna River - Delhi",
-    wqi: 35,
-    status: "Poor",
-    ph: 8.1,
-    oxygen: 3.2,
-    temperature: 26,
-    turbidity: 78,
-    trend: "down"
-  },
-  {
-    id: 3,
-    location: "Narmada River - Bhopal",
-    wqi: 78,
-    status: "Good",
-    ph: 7.4,
-    oxygen: 8.1,
-    temperature: 23,
-    turbidity: 25,
-    trend: "up"
-  },
-  {
-    id: 4,
-    location: "Kaveri River - Mysore",
-    wqi: 52,
-    status: "Moderate",
-    ph: 6.9,
-    oxygen: 5.5,
-    temperature: 25,
-    turbidity: 55,
-    trend: "down"
-  }
-];
+// Rivers are loaded from localStorage so admin add/delete reflects here
 
 const alerts = [
   {
     id: 1,
-    type: "critical",
-    location: "Yamuna River - Delhi",
-    message: "High pollution levels detected. Industrial waste suspected.",
-    time: "2 hours ago"
+    type: "warning",
+    location: "Mithi River",
+    message: "Elevated turbidity detected after localized rainfall.",
+    time: "1 hour ago",
   },
   {
     id: 2,
-    type: "warning",
-    location: "Ganges River - Haridwar",
-    message: "Increased turbidity levels after heavy rainfall.",
-    time: "6 hours ago"
+    type: "info",
+    location: "Godavari",
+    message: "Dissolved oxygen levels improved across upstream sites.",
+    time: "3 hours ago",
   },
   {
     id: 3,
+    type: "warning",
+    location: "Krishna",
+    message: "Slight pH fluctuation observed near agricultural discharge.",
+    time: "7 hours ago",
+  },
+  {
+    id: 4,
     type: "info",
-    location: "Narmada River - Bhopal",
-    message: "Water quality improved after cleanup drive.",
-    time: "1 day ago"
-  }
+    location: "Tapi",
+    message: "WQI stable with minor seasonal temperature variation.",
+    time: "12 hours ago",
+  },
 ];
 
 function getStatusColor(status) {
@@ -113,25 +83,39 @@ function getAlertVariant(type) {
 }
 
 export default function Dashboard() {
+  const [visibleAlerts, setVisibleAlerts] = useState([]);
+  const [rivers, setRivers] = useState([]);
+
+  useEffect(() => {
+    const shuffled = [...alerts].sort(() => Math.random() - 0.5);
+    setVisibleAlerts(shuffled.slice(0, 2));
+    setRivers(getRivers());
+  }, []);
+
+  const avgWqi = useMemo(() => {
+    if (!rivers.length) return 0;
+    return Math.round(
+      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length,
+    );
+  }, [rivers]);
+
   return (
     <div className="p-6 space-y-6">
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average WQI
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Average WQI</CardTitle>
             <Droplets className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">57.5</div>
+            <div className="text-2xl font-bold">{avgWqi}</div>
             <p className="text-xs text-muted-foreground">
-              +2.1% from last month
+              Average across rivers
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -140,33 +124,25 @@ export default function Dashboard() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">
-              Active monitoring locations
-            </p>
+            <div className="text-2xl font-bold">{rivers.length}</div>
+            <p className="text-xs text-muted-foreground">Active rivers</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Alerts
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">
-              Requires immediate attention
-            </p>
+            <div className="text-2xl font-bold">{visibleAlerts.length}</div>
+            <p className="text-xs text-muted-foreground">Active alerts shown</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Reports Today
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Reports Today</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -182,7 +158,7 @@ export default function Dashboard() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Active Alerts</h2>
         <div className="space-y-3">
-          {alerts.map((alert) => (
+          {visibleAlerts.map((alert) => (
             <Alert key={alert.id} variant={getAlertVariant(alert.type)}>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
@@ -202,10 +178,12 @@ export default function Dashboard() {
 
       {/* Water Quality Index Cards */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Water Quality Index by Location</h2>
+        <h2 className="text-lg font-semibold">
+          Water Quality Index by Location
+        </h2>
         <div className="grid gap-6 md:grid-cols-2">
-          {waterQualityData.map((data) => (
-            <Card key={data.id} className="relative">
+          {rivers.map((data) => (
+            <Card key={data.slug} className="relative">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{data.location}</CardTitle>
@@ -215,8 +193,8 @@ export default function Dashboard() {
                     ) : (
                       <TrendingDown className="h-4 w-4 text-red-500" />
                     )}
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className={`${getStatusColor(data.status)} text-white`}
                     >
                       {data.status}
@@ -235,7 +213,7 @@ export default function Dashboard() {
                   </div>
                   <Progress value={data.wqi} className="h-2" />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <Zap className="h-4 w-4 text-blue-500" />
@@ -244,7 +222,7 @@ export default function Dashboard() {
                       <div className="font-medium">{data.ph}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Droplets className="h-4 w-4 text-blue-500" />
                     <div>
@@ -252,19 +230,23 @@ export default function Dashboard() {
                       <div className="font-medium">{data.oxygen}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Thermometer className="h-4 w-4 text-orange-500" />
                     <div>
-                      <div className="text-muted-foreground">Temperature (°C)</div>
+                      <div className="text-muted-foreground">
+                        Temperature (°C)
+                      </div>
                       <div className="font-medium">{data.temperature}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <div>
-                      <div className="text-muted-foreground">Turbidity (NTU)</div>
+                      <div className="text-muted-foreground">
+                        Turbidity (NTU)
+                      </div>
                       <div className="font-medium">{data.turbidity}</div>
                     </div>
                   </div>

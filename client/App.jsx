@@ -1,5 +1,3 @@
-import "./global.css";
-
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,12 +10,15 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
+import RiverDetails from "./pages/RiverDetails";
+import Admin from "./pages/Admin";
+import AddRiver from "./pages/AddRiver";
 import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
-import Maps from "./pages/Maps"; // ✅ Maps page
+import Maps from "./pages/Maps";
 
-import { FileText, Calendar, Newspaper, Users } from "lucide-react";
+import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,16 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
+          <Route
+            path="/dashboard/rivers/:slug"
+            element={
+              <DashboardLayout>
+                <RiverDetails />
+              </DashboardLayout>
+            }
+          />
+
           <Route
             path="/dashboard/reports"
             element={
@@ -54,14 +65,16 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/maps"
             element={
               <DashboardLayout>
-                <Maps /> {/* ✅ Maps is now used here */}
+                <Maps />
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/cleanup"
             element={
@@ -74,6 +87,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/news"
             element={
@@ -86,15 +100,21 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/admin"
             element={
               <DashboardLayout>
-                <PlaceholderPage
-                  title="Admin Dashboard"
-                  description="Manage users and moderate pollution reports."
-                  icon={<Users className="w-8 h-8 text-muted-foreground" />}
-                />
+                <Admin />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/admin/rivers/new"
+            element={
+              <DashboardLayout>
+                <AddRiver />
               </DashboardLayout>
             }
           />
@@ -110,4 +130,3 @@ const App = () => (
 );
 
 createRoot(document.getElementById("root")).render(<App />);
-
