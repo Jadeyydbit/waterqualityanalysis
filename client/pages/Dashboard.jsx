@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -124,6 +125,13 @@ function getAlertVariant(type) {
 }
 
 export default function Dashboard() {
+  const [visibleAlerts, setVisibleAlerts] = useState([]);
+
+  useEffect(() => {
+    const shuffled = [...alerts].sort(() => Math.random() - 0.5);
+    setVisibleAlerts(shuffled.slice(0, 2));
+  }, []);
+
   return (
     <div className="p-6 space-y-6">
       {/* Stats Overview */}
@@ -193,7 +201,7 @@ export default function Dashboard() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Active Alerts</h2>
         <div className="space-y-3">
-          {alerts.map((alert) => (
+          {visibleAlerts.map((alert) => (
             <Alert key={alert.id} variant={getAlertVariant(alert.type)}>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
