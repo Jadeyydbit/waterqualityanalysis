@@ -2,12 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Droplets, 
-  Thermometer, 
-  Zap, 
-  AlertTriangle, 
-  TrendingUp, 
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import {
+  Droplets,
+  Thermometer,
+  Zap,
+  AlertTriangle,
+  TrendingUp,
   TrendingDown,
   MapPin,
   Clock
@@ -16,46 +18,50 @@ import {
 const waterQualityData = [
   {
     id: 1,
-    location: "Ganges River - Varanasi",
-    wqi: 65,
+    slug: "mithi",
+    location: "Mithi River",
+    wqi: 48,
     status: "Moderate",
-    ph: 7.2,
-    oxygen: 6.8,
-    temperature: 24,
-    turbidity: 45,
-    trend: "up"
-  },
-  {
-    id: 2,
-    location: "Yamuna River - Delhi",
-    wqi: 35,
-    status: "Poor",
-    ph: 8.1,
-    oxygen: 3.2,
-    temperature: 26,
-    turbidity: 78,
+    ph: 7.1,
+    oxygen: 4.5,
+    temperature: 27,
+    turbidity: 62,
     trend: "down"
   },
   {
-    id: 3,
-    location: "Narmada River - Bhopal",
-    wqi: 78,
+    id: 2,
+    slug: "godavari",
+    location: "Godavari",
+    wqi: 72,
     status: "Good",
     ph: 7.4,
-    oxygen: 8.1,
-    temperature: 23,
-    turbidity: 25,
+    oxygen: 7.9,
+    temperature: 25,
+    turbidity: 30,
+    trend: "up"
+  },
+  {
+    id: 3,
+    slug: "krishna",
+    location: "Krishna",
+    wqi: 66,
+    status: "Moderate",
+    ph: 7.0,
+    oxygen: 6.2,
+    temperature: 24,
+    turbidity: 40,
     trend: "up"
   },
   {
     id: 4,
-    location: "Kaveri River - Mysore",
-    wqi: 52,
+    slug: "tapi",
+    location: "Tapi",
+    wqi: 58,
     status: "Moderate",
-    ph: 6.9,
-    oxygen: 5.5,
-    temperature: 25,
-    turbidity: 55,
+    ph: 7.3,
+    oxygen: 5.6,
+    temperature: 26,
+    turbidity: 50,
     trend: "down"
   }
 ];
@@ -244,7 +250,7 @@ export default function Dashboard() {
                       <div className="font-medium">{data.ph}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Droplets className="h-4 w-4 text-blue-500" />
                     <div>
@@ -252,7 +258,7 @@ export default function Dashboard() {
                       <div className="font-medium">{data.oxygen}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Thermometer className="h-4 w-4 text-orange-500" />
                     <div>
@@ -260,7 +266,7 @@ export default function Dashboard() {
                       <div className="font-medium">{data.temperature}</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <div>
@@ -268,6 +274,12 @@ export default function Dashboard() {
                       <div className="font-medium">{data.turbidity}</div>
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <Button size="sm" asChild>
+                    <Link to={`/dashboard/rivers/${data.slug}`}>Details</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
