@@ -2,8 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import {
   Droplets,
   Thermometer,
@@ -69,24 +67,31 @@ const waterQualityData = [
 const alerts = [
   {
     id: 1,
-    type: "critical",
-    location: "Yamuna River - Delhi",
-    message: "High pollution levels detected. Industrial waste suspected.",
-    time: "2 hours ago"
+    type: "warning",
+    location: "Mithi River",
+    message: "Elevated turbidity detected after localized rainfall.",
+    time: "1 hour ago"
   },
   {
     id: 2,
-    type: "warning",
-    location: "Ganges River - Haridwar",
-    message: "Increased turbidity levels after heavy rainfall.",
-    time: "6 hours ago"
+    type: "info",
+    location: "Godavari",
+    message: "Dissolved oxygen levels improved across upstream sites.",
+    time: "3 hours ago"
   },
   {
     id: 3,
+    type: "warning",
+    location: "Krishna",
+    message: "Slight pH fluctuation observed near agricultural discharge.",
+    time: "7 hours ago"
+  },
+  {
+    id: 4,
     type: "info",
-    location: "Narmada River - Bhopal",
-    message: "Water quality improved after cleanup drive.",
-    time: "1 day ago"
+    location: "Tapi",
+    message: "WQI stable with minor seasonal temperature variation.",
+    time: "12 hours ago"
   }
 ];
 
@@ -276,11 +281,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="pt-2 flex justify-end">
-                  <Button size="sm" asChild>
-                    <Link to={`/dashboard/rivers/${data.slug}`}>Details</Link>
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           ))}
