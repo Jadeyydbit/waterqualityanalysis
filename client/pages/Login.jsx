@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Waves, Droplets } from "lucide-react";
 
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
