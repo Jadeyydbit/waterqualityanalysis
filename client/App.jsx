@@ -1,11 +1,10 @@
-import "./global.css";
-
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -17,6 +16,8 @@ import AddRiver from "./pages/AddRiver";
 import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
+import Maps from "./pages/Maps";
+
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/rivers/:slug"
             element={
@@ -50,6 +52,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/reports"
             element={
@@ -62,18 +65,16 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/maps"
             element={
               <DashboardLayout>
-                <PlaceholderPage
-                  title="Interactive Maps"
-                  description="View pollution levels across rivers on an interactive map."
-                  icon={<Map className="w-8 h-8 text-muted-foreground" />}
-                />
+                <Maps />
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/cleanup"
             element={
@@ -86,6 +87,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/news"
             element={
@@ -98,6 +100,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/admin"
             element={
@@ -106,6 +109,7 @@ const App = () => (
               </DashboardLayout>
             }
           />
+
           <Route
             path="/dashboard/admin/rivers/new"
             element={
@@ -115,7 +119,7 @@ const App = () => (
             }
           />
 
-          {/* Legacy home page - redirect to login */}
+          {/* Legacy home page */}
           <Route path="/home" element={<Index />} />
 
           <Route path="*" element={<NotFound />} />

@@ -12,15 +12,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { OtpInput } from "@/components/ui/otp-input";
-import { Waves, Droplets, AlertCircle, ArrowLeft, Mail } from "lucide-react";
+import { Waves, Droplets, AlertCircle, ArrowLeft, Smartphone } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState("signup"); // "signup" or "otp"
+  const [currentStep, setCurrentStep] = useState("signup");
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    phone_number: "",
     password: "",
     confirmPassword: "",
   });
@@ -28,47 +28,77 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // ✅ Backend URL
+  const API_BASE = "http://127.0.0.1:5000";
 
   const handleChange = (e) => {
+    let { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
     setError("");
   };
 
+  // ✅ Submit Signup Form → Send OTP
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setMessage("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters long");
       return;
     }
 
+    // Format phone number
+    const phoneDigits = formData.phone_number.replace(/\D/g, "");
+    const formattedPhoneNumber = phoneDigits.startsWith("91")
+      ? `+${phoneDigits}`
+      : `+91${phoneDigits}`;
+
+    if (!/^\+91\d{10}$/.test(formattedPhoneNumber)) {
+      setError("Enter a valid 10-digit Indian phone number");
+      return;
+    }
+
     setIsLoading(true);
-
     try {
-      // TODO: Connect to backend API to create account and send OTP
-      console.log("Register attempt:", formData);
+      const res = await fetch(`${API_BASE}/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formattedPhoneNumber }),
+      });
 
-      // Simulate API call to register user and send OTP
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
 
-      // Move to OTP verification step
-      setCurrentStep("otp");
-      setIsLoading(false);
+      if (data.success) {
+        setFormData((prev) => ({ ...prev, phone_number: formattedPhoneNumber }));
+        setCurrentStep("otp");
+        setMessage("OTP sent successfully!");
+      } else {
+        setError(data.message || "Failed to send OTP");
+      }
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      console.error(err);
+      setError("Error sending OTP. Check if backend is running and CORS is set.");
+    } finally {
       setIsLoading(false);
     }
   };
 
+  // ✅ Verify OTP
   const handleOtpVerification = async () => {
     if (otpValue.length !== 6) {
       setError("Please enter a valid 6-digit OTP");
@@ -77,43 +107,68 @@ export default function Register() {
 
     setIsLoading(true);
     setError("");
+    setMessage("");
 
     try {
-      // TODO: Connect to backend API to verify OTP
-      console.log("OTP verification:", otpValue);
+      const res = await fetch(`${API_BASE}/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formData.phone_number,
+          code: otpValue,
+        }),
+      });
 
-      // Simulate API call to verify OTP
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
 
-      // For demo purposes, accept any 6-digit OTP
-      // In real implementation, verify against backend
-      if (otpValue === "123456" || otpValue.length === 6) {
-        // Redirect to login page on successful verification
+      if (data.success) {
+        setMessage("🎉 Phone Verified Successfully!");
         navigate("/login");
       } else {
-        setError("Invalid OTP. Please try again.");
+        setError(data.message || "Invalid OTP. Please try again.");
       }
     } catch (err) {
-      setError("OTP verification failed. Please try again.");
+      console.error(err);
+      setError("Error verifying OTP. Check if backend is running.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ✅ Resend OTP
   const handleResendOtp = async () => {
     setResendLoading(true);
     setError("");
+    setMessage("");
 
     try {
-      // TODO: Connect to backend API to resend OTP
-      console.log("Resending OTP to:", formData.email);
+      const res = await fetch(`${API_BASE}/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: formData.phone_number }),
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
 
-      setResendLoading(false);
+      if (data.success) {
+        setMessage("OTP resent successfully!");
+      } else {
+        setError(data.message || "Failed to resend OTP");
+      }
     } catch (err) {
-      setError("Failed to resend OTP. Please try again.");
+      console.error(err);
+      setError("Error resending OTP.");
+    } finally {
       setResendLoading(false);
     }
   };
@@ -122,6 +177,7 @@ export default function Register() {
     setCurrentStep("signup");
     setOtpValue("");
     setError("");
+    setMessage("");
   };
 
   return (
@@ -131,22 +187,15 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Waves className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            River Monitor
-          </h1>
-          <p className="text-gray-600">
-            Join us in protecting our water resources
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">River Monitor</h1>
+          <p className="text-gray-600">Join us in protecting our water resources</p>
         </div>
 
         <Card className="w-full shadow-lg">
           {currentStep === "signup" ? (
-            // Signup Form
             <>
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">
-                  Create account
-                </CardTitle>
+                <CardTitle className="text-2xl text-center">Create account</CardTitle>
                 <CardDescription className="text-center">
                   Sign up to start monitoring water quality in your area
                 </CardDescription>
@@ -157,6 +206,11 @@ export default function Register() {
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  {message && (
+                    <Alert>
+                      <AlertDescription>{message}</AlertDescription>
                     </Alert>
                   )}
 
@@ -175,13 +229,13 @@ export default function Register() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="phone_number">Phone Number</Label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
+                      id="phone_number"
+                      name="phone_number"
+                      type="tel"
+                      placeholder="+919876543210"
+                      value={formData.phone_number}
                       onChange={handleChange}
                       required
                       className="h-11"
@@ -216,11 +270,7 @@ export default function Register() {
                     />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-11"
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" className="w-full h-11" disabled={isLoading}>
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
                         <Droplets className="w-4 h-4 animate-pulse" />
@@ -235,33 +285,24 @@ export default function Register() {
               <CardFooter className="text-center">
                 <p className="text-sm text-gray-600 w-full">
                   Already have an account?{" "}
-                  <Link
-                    to="/login"
-                    className="text-primary hover:underline font-medium"
-                  >
+                  <Link to="/login" className="text-primary hover:underline font-medium">
                     Sign in
                   </Link>
                 </p>
               </CardFooter>
             </>
           ) : (
-            // OTP Verification Form
             <>
               <CardHeader className="space-y-1">
                 <div className="flex items-center justify-center mb-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full">
-                    <Mail className="w-8 h-8 text-primary" />
+                    <Smartphone className="w-8 h-8 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl text-center">
-                  Verify your email
-                </CardTitle>
+                <CardTitle className="text-2xl text-center">Verify your phone number</CardTitle>
                 <CardDescription className="text-center">
-                  We've sent a 6-digit verification code to
-                  <br />
-                  <span className="font-medium text-foreground">
-                    {formData.email}
-                  </span>
+                  We've sent a 6-digit verification code to <br />
+                  <span className="font-medium text-foreground">{formData.phone_number}</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -271,16 +312,19 @@ export default function Register() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
+                {message && (
+                  <Alert>
+                    <AlertDescription>{message}</AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="space-y-4">
-                  <Label className="text-center block">
-                    Enter verification code
-                  </Label>
+                  <Label className="text-center block">Enter verification code</Label>
                   <OtpInput
                     length={6}
                     value={otpValue}
                     onChange={setOtpValue}
-                    onComplete={setOtpValue}
+                    onComplete={handleOtpVerification}
                   />
                 </div>
 
