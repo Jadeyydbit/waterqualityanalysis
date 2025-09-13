@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +33,7 @@ export default function AddRiver() {
     temperature: "",
     turbidity: "",
     trend: "up",
-    locations: ""
+    locations: "",
   });
 
   useEffect(() => {
@@ -46,7 +52,8 @@ export default function AddRiver() {
     setError("");
 
     if (!form.name) return setError("Name is required");
-    if (!form.wqi || isNaN(Number(form.wqi))) return setError("Valid WQI is required");
+    if (!form.wqi || isNaN(Number(form.wqi)))
+      return setError("Valid WQI is required");
 
     const river = {
       slug: generateSlug(form.name),
@@ -69,7 +76,9 @@ export default function AddRiver() {
       <Card className="max-w-xl mx-auto">
         <CardHeader>
           <CardTitle>Add River</CardTitle>
-          <CardDescription>Enter river details. Only admins can add rivers.</CardDescription>
+          <CardDescription>
+            Enter river details. Only admins can add rivers.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,17 +90,36 @@ export default function AddRiver() {
 
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" value={form.name} onChange={handleChange} required />
+              <Input
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="wqi">WQI</Label>
-                <Input id="wqi" name="wqi" type="number" value={form.wqi} onChange={handleChange} required />
+                <Input
+                  id="wqi"
+                  name="wqi"
+                  type="number"
+                  value={form.wqi}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <select id="status" name="status" value={form.status} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <select
+                  id="status"
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
                   <option>Excellent</option>
                   <option>Good</option>
                   <option>Moderate</option>
@@ -104,28 +132,60 @@ export default function AddRiver() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="ph">pH</Label>
-                <Input id="ph" name="ph" type="number" step="0.1" value={form.ph} onChange={handleChange} />
+                <Input
+                  id="ph"
+                  name="ph"
+                  type="number"
+                  step="0.1"
+                  value={form.ph}
+                  onChange={handleChange}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="oxygen">Oxygen (mg/L)</Label>
-                <Input id="oxygen" name="oxygen" type="number" step="0.1" value={form.oxygen} onChange={handleChange} />
+                <Input
+                  id="oxygen"
+                  name="oxygen"
+                  type="number"
+                  step="0.1"
+                  value={form.oxygen}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="temperature">Temperature (°C)</Label>
-                <Input id="temperature" name="temperature" type="number" value={form.temperature} onChange={handleChange} />
+                <Input
+                  id="temperature"
+                  name="temperature"
+                  type="number"
+                  value={form.temperature}
+                  onChange={handleChange}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="turbidity">Turbidity (NTU)</Label>
-                <Input id="turbidity" name="turbidity" type="number" value={form.turbidity} onChange={handleChange} />
+                <Input
+                  id="turbidity"
+                  name="turbidity"
+                  type="number"
+                  value={form.turbidity}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="trend">Trend</Label>
-              <select id="trend" name="trend" value={form.trend} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                id="trend"
+                name="trend"
+                value={form.trend}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option value="up">Up</option>
                 <option value="down">Down</option>
               </select>

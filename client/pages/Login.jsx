@@ -4,7 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Waves, Droplets } from "lucide-react";
 
 export default function Login() {
@@ -16,10 +23,10 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // TODO: Connect to backend API
     console.log("Login attempt:", { email, password, rememberMe });
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -39,7 +46,9 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Waves className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">River Monitor</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            River Monitor
+          </h1>
           <p className="text-gray-600">Protecting our water resources</p>
         </div>
 
@@ -78,8 +87,8 @@ export default function Login() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remember" 
+                  <Checkbox
+                    id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked)}
                   />
@@ -87,16 +96,16 @@ export default function Login() {
                     Remember me
                   </Label>
                 </div>
-                <Link 
-                  to="/forgot-password" 
+                <Link
+                  to="/forgot-password"
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
                 </Link>
               </div>
-              <Button 
-                type="submit" 
-                className="w-full h-11" 
+              <Button
+                type="submit"
+                className="w-full h-11"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -113,7 +122,10 @@ export default function Login() {
           <CardFooter className="text-center">
             <p className="text-sm text-gray-600 w-full">
               Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline font-medium">
+              <Link
+                to="/register"
+                className="text-primary hover:underline font-medium"
+              >
                 Sign up
               </Link>
             </p>

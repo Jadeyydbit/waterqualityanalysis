@@ -72,7 +72,9 @@ export function getRivers() {
 
 export function addRiver(river) {
   const rivers = getRivers();
-  const nextId = rivers.length ? Math.max(...rivers.map(r => r.id || 0)) + 1 : 1;
+  const nextId = rivers.length
+    ? Math.max(...rivers.map((r) => r.id || 0)) + 1
+    : 1;
   const withId = { ...river, id: nextId };
   const updated = [...rivers, withId];
   save(updated);
@@ -81,14 +83,14 @@ export function addRiver(river) {
 
 export function deleteRiver(slug) {
   const rivers = getRivers();
-  const updated = rivers.filter(r => r.slug !== slug);
+  const updated = rivers.filter((r) => r.slug !== slug);
   save(updated);
   return updated;
 }
 
 export function upsertRiver(river) {
   const rivers = getRivers();
-  const idx = rivers.findIndex(r => r.slug === river.slug);
+  const idx = rivers.findIndex((r) => r.slug === river.slug);
   if (idx >= 0) {
     rivers[idx] = { ...rivers[idx], ...river };
     save(rivers);

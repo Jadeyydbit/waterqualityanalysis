@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -38,13 +44,17 @@ export default function Admin() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Admin - Manage Rivers</h1>
         <Button asChild>
-          <Link to="/dashboard/admin/rivers/new"><Plus className="w-4 h-4 mr-2" /> Add River</Link>
+          <Link to="/dashboard/admin/rivers/new">
+            <Plus className="w-4 h-4 mr-2" /> Add River
+          </Link>
         </Button>
       </div>
 
       {rivers.length === 0 ? (
         <Alert>
-          <AlertDescription>No rivers found. Add a new river to get started.</AlertDescription>
+          <AlertDescription>
+            No rivers found. Add a new river to get started.
+          </AlertDescription>
         </Alert>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
@@ -58,7 +68,10 @@ export default function Admin() {
                 <Badge>{r.status}</Badge>
               </CardHeader>
               <CardContent className="flex justify-end">
-                <Button variant="destructive" onClick={() => handleDelete(r.slug)}>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(r.slug)}
+                >
                   <Trash2 className="w-4 h-4 mr-2" /> Delete
                 </Button>
               </CardContent>

@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,7 +18,7 @@ import {
   TrendingUp,
   TrendingDown,
   MapPin,
-  Clock
+  Clock,
 } from "lucide-react";
 
 // Rivers are loaded from localStorage so admin add/delete reflects here
@@ -23,29 +29,29 @@ const alerts = [
     type: "warning",
     location: "Mithi River",
     message: "Elevated turbidity detected after localized rainfall.",
-    time: "1 hour ago"
+    time: "1 hour ago",
   },
   {
     id: 2,
     type: "info",
     location: "Godavari",
     message: "Dissolved oxygen levels improved across upstream sites.",
-    time: "3 hours ago"
+    time: "3 hours ago",
   },
   {
     id: 3,
     type: "warning",
     location: "Krishna",
     message: "Slight pH fluctuation observed near agricultural discharge.",
-    time: "7 hours ago"
+    time: "7 hours ago",
   },
   {
     id: 4,
     type: "info",
     location: "Tapi",
     message: "WQI stable with minor seasonal temperature variation.",
-    time: "12 hours ago"
-  }
+    time: "12 hours ago",
+  },
 ];
 
 function getStatusColor(status) {
@@ -89,7 +95,7 @@ export default function Dashboard() {
   const avgWqi = useMemo(() => {
     if (!rivers.length) return 0;
     return Math.round(
-      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length
+      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length,
     );
   }, [rivers]);
 
@@ -99,17 +105,17 @@ export default function Dashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average WQI
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Average WQI</CardTitle>
             <Droplets className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{avgWqi}</div>
-            <p className="text-xs text-muted-foreground">Average across rivers</p>
+            <p className="text-xs text-muted-foreground">
+              Average across rivers
+            </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -122,12 +128,10 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">Active rivers</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Alerts
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -135,12 +139,10 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">Active alerts shown</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Reports Today
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Reports Today</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -176,7 +178,9 @@ export default function Dashboard() {
 
       {/* Water Quality Index Cards */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Water Quality Index by Location</h2>
+        <h2 className="text-lg font-semibold">
+          Water Quality Index by Location
+        </h2>
         <div className="grid gap-6 md:grid-cols-2">
           {rivers.map((data) => (
             <Card key={data.slug} className="relative">
@@ -189,8 +193,8 @@ export default function Dashboard() {
                     ) : (
                       <TrendingDown className="h-4 w-4 text-red-500" />
                     )}
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className={`${getStatusColor(data.status)} text-white`}
                     >
                       {data.status}
@@ -209,7 +213,7 @@ export default function Dashboard() {
                   </div>
                   <Progress value={data.wqi} className="h-2" />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <Zap className="h-4 w-4 text-blue-500" />
@@ -230,7 +234,9 @@ export default function Dashboard() {
                   <div className="flex items-center space-x-2">
                     <Thermometer className="h-4 w-4 text-orange-500" />
                     <div>
-                      <div className="text-muted-foreground">Temperature (°C)</div>
+                      <div className="text-muted-foreground">
+                        Temperature (°C)
+                      </div>
                       <div className="font-medium">{data.temperature}</div>
                     </div>
                   </div>
@@ -238,12 +244,13 @@ export default function Dashboard() {
                   <div className="flex items-center space-x-2">
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <div>
-                      <div className="text-muted-foreground">Turbidity (NTU)</div>
+                      <div className="text-muted-foreground">
+                        Turbidity (NTU)
+                      </div>
                       <div className="font-medium">{data.turbidity}</div>
                     </div>
                   </div>
                 </div>
-
               </CardContent>
             </Card>
           ))}
