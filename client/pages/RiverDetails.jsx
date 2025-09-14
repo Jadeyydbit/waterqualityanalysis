@@ -137,7 +137,7 @@ export default function RiverDetails() {
               <Zap className="h-4 w-4 text-blue-500" />
               <div>
                 <div className="text-muted-foreground">pH Level</div>
-                <div className="font-medium">{river.ph}</div>
+                <div className="font-medium">{river.phText || river.ph}</div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
