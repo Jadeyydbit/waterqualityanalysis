@@ -88,11 +88,18 @@ export function deleteRiver(slug) {
   return updated;
 }
 
-export function upsertRiver(river) {
+export function upsertRiver(river, identifier) {
   const rivers = getRivers();
-  const idx = rivers.findIndex((r) => r.slug === river.slug);
+  const key = identifier || river.slug;
+  const idx = rivers.findIndex((r) => r.slug === key);
   if (idx >= 0) {
-    rivers[idx] = { ...rivers[idx], ...river };
+    const preservedId = rivers[idx]?.id;
+    rivers[idx] = { ...rivers[idx], ...river, id: preservedId };
+    // If slug changed, ensure no duplicate entries with same slug remain
+    const newSlug = rivers[idx].slug;
+    for (let i = rivers.length - 1; i >= 0; i--) {
+      if (i !== idx && rivers[i].slug === newSlug) rivers.splice(i, 1);
+    }
     save(rivers);
     return rivers[idx];
   }
