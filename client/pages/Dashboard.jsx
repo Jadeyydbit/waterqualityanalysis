@@ -352,7 +352,7 @@ export default function Dashboard() {
                     <Zap className="h-4 w-4 text-blue-500" />
                     <div>
                       <div className="text-muted-foreground">pH Level</div>
-                      <div className="font-medium">{data.ph}</div>
+                      <div className="font-medium">{data.phText || data.ph}</div>
                     </div>
                   </div>
 
