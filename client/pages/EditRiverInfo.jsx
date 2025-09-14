@@ -59,7 +59,9 @@ export default function EditRiverInfo() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/dashboard/admin")}>Back to Admin</Button>
+            <Button onClick={() => navigate("/dashboard/admin")}>
+              Back to Admin
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -101,7 +103,8 @@ export default function EditRiverInfo() {
         <CardHeader>
           <CardTitle>Edit Info</CardTitle>
           <CardDescription>
-            Add interesting details for <span className="font-medium">{existing.location}</span>
+            Add interesting details for{" "}
+            <span className="font-medium">{existing.location}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -170,7 +173,9 @@ export default function EditRiverInfo() {
                 />
               </div>
               <div className="space-y-2 md:col-span-1">
-                <Label htmlFor="nearby_attractions">Nearby attractions (one per line)</Label>
+                <Label htmlFor="nearby_attractions">
+                  Nearby attractions (one per line)
+                </Label>
                 <textarea
                   id="nearby_attractions"
                   name="nearby_attractions"
@@ -194,7 +199,11 @@ export default function EditRiverInfo() {
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
                 Cancel
               </Button>
               <Button type="submit">Save Info</Button>

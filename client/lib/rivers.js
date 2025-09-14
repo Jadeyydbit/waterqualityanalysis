@@ -17,7 +17,8 @@ const DEFAULT_RIVERS = [
         "An urban stream flowing through Mumbai's mangroves and neighborhoods; sunrise walks near Mahim reveal herons, kingfishers, and a surprising calm between tides.",
       biodiversity:
         "Egrets, cormorants, mudskippers, fiddler crabs, and resilient mangrove species in tidal stretches.",
-      best_time_to_visit: "Early mornings in winter (Nov–Feb) for birds and softer light.",
+      best_time_to_visit:
+        "Early mornings in winter (Nov–Feb) for birds and softer light.",
       cultural_note:
         "Community cleanups and post-festival immersion drives have sparked a growing stewardship movement.",
       highlights: [
@@ -25,7 +26,11 @@ const DEFAULT_RIVERS = [
         "Sunset views near Bandra Fort",
         "Mangrove-edge cycling paths at low tide",
       ],
-      nearby_attractions: ["Bandra Fort", "Mahim Nature Park", "BKC promenades"],
+      nearby_attractions: [
+        "Bandra Fort",
+        "Mahim Nature Park",
+        "BKC promenades",
+      ],
       local_tips: [
         "Carry binoculars and avoid high tide if you want exposed mudflats.",
         "Weekday dawns are quieter for spotting wildlife.",
@@ -48,7 +53,8 @@ const DEFAULT_RIVERS = [
         "India's 'Dakshin Ganga' nurtures vineyards, temples, and fertile plains; river ghats glow with evening lamps and music.",
       biodiversity:
         "River terns, bar-headed geese in winters, and rich riparian flora around upper reaches.",
-      best_time_to_visit: "Post-monsoon to winter (Oct–Feb) for clearer skies and festivals.",
+      best_time_to_visit:
+        "Post-monsoon to winter (Oct–Feb) for clearer skies and festivals.",
       cultural_note:
         "Kumbh Mela in Nashik and historic ghats make it a vibrant spiritual corridor.",
       highlights: [
@@ -87,7 +93,11 @@ const DEFAULT_RIVERS = [
         "Sugarcane-jaggery tastings in agrarian belts",
         "Sunrise photography from low bridges",
       ],
-      nearby_attractions: ["Prakasam Barrage", "Bhavani Island", "Sangli riverfront"],
+      nearby_attractions: [
+        "Prakasam Barrage",
+        "Bhavani Island",
+        "Sangli riverfront",
+      ],
       local_tips: [
         "Carry a hat; mid-day sun can be intense even in winter.",
         "Ask locals for seasonal ferry timings across channels.",
@@ -118,7 +128,11 @@ const DEFAULT_RIVERS = [
         "Street-food trails near the ghats",
         "Angling spots along quieter bends",
       ],
-      nearby_attractions: ["Surat Riverfront", "Gopi Talav", "Dumas beach road"],
+      nearby_attractions: [
+        "Surat Riverfront",
+        "Gopi Talav",
+        "Dumas beach road",
+      ],
       local_tips: [
         "Keep a light jacket; river breeze can be nippy after sunset.",
         "Weekends host local fairs—ask around for timings.",
