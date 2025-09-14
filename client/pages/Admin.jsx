@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getRivers, deleteRiver } from "@/lib/rivers";
-import { Trash2, Plus, Pencil } from "lucide-react";
+import { Trash2, Plus, Pencil, Info } from "lucide-react";
 
 function isAdmin() {
   try {
@@ -71,6 +71,11 @@ export default function Admin() {
                 <Button asChild variant="outline">
                   <Link to={`/dashboard/admin/rivers/${r.slug}/edit`}>
                     <Pencil className="w-4 h-4 mr-2" /> Edit
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to={`/dashboard/admin/rivers/${r.slug}/edit-info`}>
+                    <Info className="w-4 h-4 mr-2" /> Edit Info
                   </Link>
                 </Button>
                 <Button
