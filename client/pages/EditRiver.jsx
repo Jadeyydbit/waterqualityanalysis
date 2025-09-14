@@ -79,7 +79,8 @@ export default function EditRiver() {
       trend: form.trend,
     };
 
-    upsertRiver(updated);
+    // Use original slug to update in place without creating a copy
+    upsertRiver(updated, slug);
     navigate("/dashboard/admin");
   };
 
@@ -88,7 +89,9 @@ export default function EditRiver() {
       <Card className="max-w-xl mx-auto">
         <CardHeader>
           <CardTitle>Edit River</CardTitle>
-          <CardDescription>Update details. Only admins can edit rivers.</CardDescription>
+          <CardDescription>
+            Updating <span className="font-medium">{existing.location}</span> ({slug})
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
