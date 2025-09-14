@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -90,6 +91,20 @@ export default function Dashboard() {
     const shuffled = [...alerts].sort(() => Math.random() - 0.5);
     setVisibleAlerts(shuffled.slice(0, 2));
     setRivers(getRivers());
+
+    const handleAny = (e) => {
+      if (!e || e.type === "rivers:updated" || e.key === "rivers") {
+        setRivers(getRivers());
+      }
+    };
+    window.addEventListener("rivers:updated", handleAny);
+    window.addEventListener("storage", handleAny);
+    window.addEventListener("focus", handleAny);
+    return () => {
+      window.removeEventListener("rivers:updated", handleAny);
+      window.removeEventListener("storage", handleAny);
+      window.removeEventListener("focus", handleAny);
+    };
   }, []);
 
   const avgWqi = useMemo(() => {
