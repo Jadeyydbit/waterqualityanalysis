@@ -32,7 +32,7 @@ export default function EditRiver() {
     name: existing?.location || "",
     wqi: existing?.wqi?.toString?.() || "",
     status: existing?.status || "Moderate",
-    ph: existing?.ph?.toString?.() || "",
+    ph: existing?.phText || existing?.ph?.toString?.() || "",
     oxygen: existing?.oxygen?.toString?.() || "",
     temperature: existing?.temperature?.toString?.() || "",
     turbidity: existing?.turbidity?.toString?.() || "",
@@ -70,6 +70,21 @@ export default function EditRiver() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const normalizePh = (val) => {
+    const raw = String(val ?? "").trim();
+    if (!raw) return { numeric: 7, text: "" };
+    const m = raw.match(/(-?\d+(?:\.\d+)?)(?:\s*[-–—]\s*(-?\d+(?:\.\d+)?))?/);
+    if (m) {
+      const a = parseFloat(m[1]);
+      const b = m[2] != null ? parseFloat(m[2]) : NaN;
+      const hasRange = /[-–—]/.test(raw) && !isNaN(a) && !isNaN(b);
+      const numeric = hasRange ? (a + b) / 2 : a;
+      const text = hasRange ? raw : "";
+      return { numeric: isNaN(numeric) ? 7 : numeric, text };
+    }
+    return { numeric: 7, text: raw };
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -83,7 +98,7 @@ export default function EditRiver() {
       location: form.name,
       wqi: Number(form.wqi),
       status: form.status,
-      ph: Number(form.ph || 7),
+      ...(function(){ const { numeric, text } = normalizePh(form.ph); return { ph: Number(numeric), phText: text }; })(),
       oxygen: Number(form.oxygen || 5),
       temperature: Number(form.temperature || 25),
       turbidity: Number(form.turbidity || 40),
@@ -160,8 +175,8 @@ export default function EditRiver() {
                 <Input
                   id="ph"
                   name="ph"
-                  type="number"
-                  step="0.1"
+                  type="text"
+                  placeholder="e.g. 7.2 or 6.5-8.0"
                   value={form.ph}
                   onChange={handleChange}
                 />
