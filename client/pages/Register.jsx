@@ -12,7 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { OtpInput } from "@/components/ui/otp-input";
-import { Waves, Droplets, AlertCircle, ArrowLeft, Smartphone } from "lucide-react";
+import {
+  Waves,
+  Droplets,
+  AlertCircle,
+  ArrowLeft,
+  Smartphone,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Register() {
@@ -84,7 +90,10 @@ export default function Register() {
       }
 
       if (data.success) {
-        setFormData((prev) => ({ ...prev, phone_number: formattedPhoneNumber }));
+        setFormData((prev) => ({
+          ...prev,
+          phone_number: formattedPhoneNumber,
+        }));
         setCurrentStep("otp");
         setMessage("OTP sent successfully!");
       } else {
@@ -92,7 +101,9 @@ export default function Register() {
       }
     } catch (err) {
       console.error(err);
-      setError("Error sending OTP. Check if backend is running and CORS is set.");
+      setError(
+        "Error sending OTP. Check if backend is running and CORS is set.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -187,15 +198,21 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
             <Waves className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">River Monitor</h1>
-          <p className="text-gray-600">Join us in protecting our water resources</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            River Monitor
+          </h1>
+          <p className="text-gray-600">
+            Join us in protecting our water resources
+          </p>
         </div>
 
         <Card className="w-full shadow-lg">
           {currentStep === "signup" ? (
             <>
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">Create account</CardTitle>
+                <CardTitle className="text-2xl text-center">
+                  Create account
+                </CardTitle>
                 <CardDescription className="text-center">
                   Sign up to start monitoring water quality in your area
                 </CardDescription>
@@ -270,7 +287,11 @@ export default function Register() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11"
+                    disabled={isLoading}
+                  >
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
                         <Droplets className="w-4 h-4 animate-pulse" />
@@ -296,10 +317,14 @@ export default function Register() {
                     <Smartphone className="w-8 h-8 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl text-center">Verify your phone number</CardTitle>
+                <CardTitle className="text-2xl text-center">
+                  Verify your phone number
+                </CardTitle>
                 <CardDescription className="text-center">
                   We've sent a 6-digit verification code to <br />
-                  <span className="font-medium text-foreground">{formData.phone_number}</span>
+                  <span className="font-medium text-foreground">
+                    {formData.phone_number}
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -316,7 +341,9 @@ export default function Register() {
                 )}
 
                 <div className="space-y-4">
-                  <Label className="text-center block">Enter verification code</Label>
+                  <Label className="text-center block">
+                    Enter verification code
+                  </Label>
                   <OtpInput
                     length={6}
                     value={otpValue}
