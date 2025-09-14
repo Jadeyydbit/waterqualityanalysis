@@ -53,6 +53,10 @@ const DEFAULT_RIVERS = [
 
 function save(rivers) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(rivers));
+  try {
+    // Notify all tabs within this app
+    window.dispatchEvent(new Event("rivers:updated"));
+  } catch (e) {}
 }
 
 export function getRivers() {
