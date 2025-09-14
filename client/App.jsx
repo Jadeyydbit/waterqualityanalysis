@@ -14,6 +14,7 @@ import RiverDetails from "./pages/RiverDetails";
 import Admin from "./pages/Admin";
 import AddRiver from "./pages/AddRiver";
 import EditRiver from "./pages/EditRiver";
+import EditRiverInfo from "./pages/EditRiverInfo";
 import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
@@ -124,6 +125,14 @@ const App = () => (
             element={
               <DashboardLayout>
                 <EditRiver />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/dashboard/admin/rivers/:slug/edit-info"
+            element={
+              <DashboardLayout>
+                <EditRiverInfo />
               </DashboardLayout>
             }
           />
