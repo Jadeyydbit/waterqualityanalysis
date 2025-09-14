@@ -283,12 +283,9 @@ export default function Register() {
                 </form>
               </CardContent>
               <CardFooter className="text-center">
-                <p className="text-sm text-gray-600 w-full">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-primary hover:underline font-medium">
-                    Sign in
-                  </Link>
-                </p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/login">Already have an account? Sign in</Link>
+                </Button>
               </CardFooter>
             </>
           ) : (
