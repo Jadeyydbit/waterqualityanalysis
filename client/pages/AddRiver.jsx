@@ -62,23 +62,39 @@ export default function AddRiver() {
     return { numeric: 7, text: raw };
   };
 
+  const normalizeRangeOrNumber = (val, fallback) => {
+    const raw = String(val ?? "").trim();
+    if (!raw) return { numeric: fallback, text: "" };
+    const m = raw.match(/(-?\d+(?:\.\d+)?)(?:\s*[-–—]\s*(-?\d+(?:\.\d+)?))?/);
+    if (m) {
+      const a = parseFloat(m[1]);
+      const b = m[2] != null ? parseFloat(m[2]) : NaN;
+      const hasRange = /[-–—]/.test(raw) && !isNaN(a) && !isNaN(b);
+      const numeric = hasRange ? (a + b) / 2 : a;
+      const text = hasRange ? raw : "";
+      return { numeric: isNaN(numeric) ? fallback : numeric, text };
+    }
+    const onlyNum = parseFloat(raw);
+    if (!isNaN(onlyNum)) return { numeric: onlyNum, text: "" };
+    return { numeric: fallback, text: raw };
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
     if (!form.name) return setError("Name is required");
-    if (!form.wqi || isNaN(Number(form.wqi)))
-      return setError("Valid WQI is required");
+    if (!form.wqi) return setError("WQI is required");
 
     const river = {
       slug: generateSlug(form.name),
       location: form.name,
-      wqi: Number(form.wqi),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.wqi, 50); return { wqi: Number(numeric), wqiText: text }; })(),
       status: form.status,
-      ...(function(){ const { numeric, text } = normalizePh(form.ph); return { ph: Number(numeric), phText: text }; })(),
-      oxygen: Number(form.oxygen || 5),
-      temperature: Number(form.temperature || 25),
-      turbidity: Number(form.turbidity || 40),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.ph, 7); return { ph: Number(numeric), phText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.oxygen, 5); return { oxygen: Number(numeric), oxygenText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.temperature, 25); return { temperature: Number(numeric), temperatureText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.turbidity, 40); return { turbidity: Number(numeric), turbidityText: text }; })(),
       trend: form.trend,
     };
 
@@ -120,7 +136,8 @@ export default function AddRiver() {
                 <Input
                   id="wqi"
                   name="wqi"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 72 or 65-80"
                   value={form.wqi}
                   onChange={handleChange}
                   required
@@ -161,8 +178,8 @@ export default function AddRiver() {
                 <Input
                   id="oxygen"
                   name="oxygen"
-                  type="number"
-                  step="0.1"
+                  type="text"
+                  placeholder="e.g. 7.5 or 6.5-8.0"
                   value={form.oxygen}
                   onChange={handleChange}
                 />
@@ -175,7 +192,8 @@ export default function AddRiver() {
                 <Input
                   id="temperature"
                   name="temperature"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 25 or 24-28"
                   value={form.temperature}
                   onChange={handleChange}
                 />
@@ -185,7 +203,8 @@ export default function AddRiver() {
                 <Input
                   id="turbidity"
                   name="turbidity"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 40 or 30-50"
                   value={form.turbidity}
                   onChange={handleChange}
                 />
