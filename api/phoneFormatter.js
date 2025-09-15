@@ -1,19 +1,25 @@
-export default function formatToE164(phone, defaultCountryCode = "+91") {
-  if (!phone) return "";
+// lib/phoneFormatter.js
+function formatToE164(phoneNumber, defaultCountryCode = "+91") {
+  if (!phoneNumber) throw new Error("Phone number is required");
 
-  // Remove spaces, dashes, brackets
-  let digits = phone.replace(/\D/g, "");
+  // Trim and clean input
+  let input = String(phoneNumber).trim();
 
-  // If it already starts with country code, just return with +
-  if (digits.startsWith(defaultCountryCode.replace("+", ""))) {
-    return `+${digits}`;
+  // ✅ If already in correct E.164 format
+  if (/^\+\d{10,15}$/.test(input)) {
+    return input;
   }
 
-  // If 10 digits only, prefix country code
-  if (digits.length === 10) {
-    return `${defaultCountryCode}${digits}`;
+  // Remove non-digits
+  let cleanNumber = input.replace(/\D/g, "");
+
+  // ✅ If looks like a full international number (e.g. 11+ digits)
+  if (cleanNumber.length > 10) {
+    return `+${cleanNumber}`;
   }
 
-  // Otherwise return as-is with +
-  return digits.startsWith("+") ? digits : `+${digits}`;
+  // ✅ Otherwise prepend default country code
+  return `${defaultCountryCode}${cleanNumber}`;
 }
+
+export default formatToE164;
