@@ -120,14 +120,14 @@ export default function RiverDetails() {
             <CardTitle className="text-base">Water Quality Overview</CardTitle>
             <Badge className={`${getStatusColor(river.status)} text-white`}>{river.status}</Badge>
           </div>
-          <CardDescription>Water Quality Index: {river.wqi}/100</CardDescription>
+          <CardDescription>Water Quality Index: {(river.wqiText || river.wqi)}/100</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm text-muted-foreground">{river.description}</p>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>WQI Score</span>
-              <span>{river.wqi}/100</span>
+              <span>{(river.wqiText || river.wqi)}/100</span>
             </div>
             <Progress value={river.wqi} className="h-2" />
           </div>
@@ -144,21 +144,21 @@ export default function RiverDetails() {
               <Droplets className="h-4 w-4 text-blue-500" />
               <div>
                 <div className="text-muted-foreground">Oxygen (mg/L)</div>
-                <div className="font-medium">{river.oxygen}</div>
+                <div className="font-medium">{river.oxygenText || river.oxygen}</div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <Thermometer className="h-4 w-4 text-orange-500" />
               <div>
                 <div className="text-muted-foreground">Temperature (°C)</div>
-                <div className="font-medium">{river.temperature}</div>
+                <div className="font-medium">{river.temperatureText || river.temperature}</div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
               <div>
                 <div className="text-muted-foreground">Turbidity (NTU)</div>
-                <div className="font-medium">{river.turbidity}</div>
+                <div className="font-medium">{river.turbidityText || river.turbidity}</div>
               </div>
             </div>
           </div>
