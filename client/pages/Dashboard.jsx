@@ -335,14 +335,14 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <CardDescription>
-                  Water Quality Index: {data.wqi}/100
+                  Water Quality Index: {(data.wqiText || data.wqi)}/100
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>WQI Score</span>
-                    <span>{data.wqi}/100</span>
+                    <span>{(data.wqiText || data.wqi)}/100</span>
                   </div>
                   <Progress value={data.wqi} className="h-2" />
                 </div>
@@ -360,7 +360,7 @@ export default function Dashboard() {
                     <Droplets className="h-4 w-4 text-blue-500" />
                     <div>
                       <div className="text-muted-foreground">Oxygen (mg/L)</div>
-                      <div className="font-medium">{data.oxygen}</div>
+                      <div className="font-medium">{data.oxygenText || data.oxygen}</div>
                     </div>
                   </div>
 
@@ -370,7 +370,7 @@ export default function Dashboard() {
                       <div className="text-muted-foreground">
                         Temperature (°C)
                       </div>
-                      <div className="font-medium">{data.temperature}</div>
+                      <div className="font-medium">{data.temperatureText || data.temperature}</div>
                     </div>
                   </div>
 
@@ -380,7 +380,7 @@ export default function Dashboard() {
                       <div className="text-muted-foreground">
                         Turbidity (NTU)
                       </div>
-                      <div className="font-medium">{data.turbidity}</div>
+                      <div className="font-medium">{data.turbidityText || data.turbidity}</div>
                     </div>
                   </div>
                 </div>
