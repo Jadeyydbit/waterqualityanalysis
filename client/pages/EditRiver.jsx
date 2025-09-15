@@ -30,12 +30,12 @@ export default function EditRiver() {
 
   const [form, setForm] = useState(() => ({
     name: existing?.location || "",
-    wqi: existing?.wqi?.toString?.() || "",
+    wqi: existing?.wqiText || existing?.wqi?.toString?.() || "",
     status: existing?.status || "Moderate",
     ph: existing?.phText || existing?.ph?.toString?.() || "",
-    oxygen: existing?.oxygen?.toString?.() || "",
-    temperature: existing?.temperature?.toString?.() || "",
-    turbidity: existing?.turbidity?.toString?.() || "",
+    oxygen: existing?.oxygenText || existing?.oxygen?.toString?.() || "",
+    temperature: existing?.temperatureText || existing?.temperature?.toString?.() || "",
+    turbidity: existing?.turbidityText || existing?.turbidity?.toString?.() || "",
     trend: existing?.trend || "up",
   }));
 
@@ -70,9 +70,9 @@ export default function EditRiver() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const normalizePh = (val) => {
+  const normalizeRangeOrNumber = (val, fallback) => {
     const raw = String(val ?? "").trim();
-    if (!raw) return { numeric: 7, text: "" };
+    if (!raw) return { numeric: fallback, text: "" };
     const m = raw.match(/(-?\d+(?:\.\d+)?)(?:\s*[-–—]\s*(-?\d+(?:\.\d+)?))?/);
     if (m) {
       const a = parseFloat(m[1]);
@@ -80,9 +80,11 @@ export default function EditRiver() {
       const hasRange = /[-–—]/.test(raw) && !isNaN(a) && !isNaN(b);
       const numeric = hasRange ? (a + b) / 2 : a;
       const text = hasRange ? raw : "";
-      return { numeric: isNaN(numeric) ? 7 : numeric, text };
+      return { numeric: isNaN(numeric) ? fallback : numeric, text };
     }
-    return { numeric: 7, text: raw };
+    const onlyNum = parseFloat(raw);
+    if (!isNaN(onlyNum)) return { numeric: onlyNum, text: "" };
+    return { numeric: fallback, text: raw };
   };
 
   const handleSubmit = (e) => {
@@ -90,18 +92,17 @@ export default function EditRiver() {
     setError("");
 
     if (!form.name) return setError("Name is required");
-    if (!form.wqi || isNaN(Number(form.wqi)))
-      return setError("Valid WQI is required");
+    if (!form.wqi) return setError("WQI is required");
 
     const updated = {
       slug: generateSlug(form.name),
       location: form.name,
-      wqi: Number(form.wqi),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.wqi, 50); return { wqi: Number(numeric), wqiText: text }; })(),
       status: form.status,
-      ...(function(){ const { numeric, text } = normalizePh(form.ph); return { ph: Number(numeric), phText: text }; })(),
-      oxygen: Number(form.oxygen || 5),
-      temperature: Number(form.temperature || 25),
-      turbidity: Number(form.turbidity || 40),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.ph, 7); return { ph: Number(numeric), phText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.oxygen, 5); return { oxygen: Number(numeric), oxygenText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.temperature, 25); return { temperature: Number(numeric), temperatureText: text }; })(),
+      ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.turbidity, 40); return { turbidity: Number(numeric), turbidityText: text }; })(),
       trend: form.trend,
     };
 
@@ -145,7 +146,8 @@ export default function EditRiver() {
                 <Input
                   id="wqi"
                   name="wqi"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 72 or 65-80"
                   value={form.wqi}
                   onChange={handleChange}
                   required
@@ -186,8 +188,8 @@ export default function EditRiver() {
                 <Input
                   id="oxygen"
                   name="oxygen"
-                  type="number"
-                  step="0.1"
+                  type="text"
+                  placeholder="e.g. 7.5 or 6.5-8.0"
                   value={form.oxygen}
                   onChange={handleChange}
                 />
@@ -200,7 +202,8 @@ export default function EditRiver() {
                 <Input
                   id="temperature"
                   name="temperature"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 25 or 24-28"
                   value={form.temperature}
                   onChange={handleChange}
                 />
@@ -210,7 +213,8 @@ export default function EditRiver() {
                 <Input
                   id="turbidity"
                   name="turbidity"
-                  type="number"
+                  type="text"
+                  placeholder="e.g. 40 or 30-50"
                   value={form.turbidity}
                   onChange={handleChange}
                 />
