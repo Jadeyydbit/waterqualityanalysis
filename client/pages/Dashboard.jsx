@@ -9,6 +9,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { getRivers } from "@/lib/rivers";
 import {
   Droplets,
@@ -19,6 +28,7 @@ import {
   TrendingDown,
   MapPin,
   Clock,
+  Info,
 } from "lucide-react";
 
 // Rivers are loaded from localStorage so admin add/delete reflects here
@@ -90,6 +100,20 @@ export default function Dashboard() {
     const shuffled = [...alerts].sort(() => Math.random() - 0.5);
     setVisibleAlerts(shuffled.slice(0, 2));
     setRivers(getRivers());
+
+    const handleAny = (e) => {
+      if (!e || e.type === "rivers:updated" || e.key === "rivers") {
+        setRivers(getRivers());
+      }
+    };
+    window.addEventListener("rivers:updated", handleAny);
+    window.addEventListener("storage", handleAny);
+    window.addEventListener("focus", handleAny);
+    return () => {
+      window.removeEventListener("rivers:updated", handleAny);
+      window.removeEventListener("storage", handleAny);
+      window.removeEventListener("focus", handleAny);
+    };
   }, []);
 
   const avgWqi = useMemo(() => {
@@ -188,6 +212,115 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{data.location}</CardTitle>
                   <div className="flex items-center space-x-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`More about ${data.location}`}
+                        >
+                          <Info className="h-4 w-4 mr-1" /> Info
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{data.location}</DialogTitle>
+                          <DialogDescription>
+                            Learn more about this river beyond water quality
+                            numbers.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {data?.info ? (
+                          <div className="space-y-4">
+                            {data.info.overview && (
+                              <p className="text-sm text-muted-foreground">
+                                {data.info.overview}
+                              </p>
+                            )}
+                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                              {data.info.best_time_to_visit && (
+                                <div>
+                                  <div className="text-muted-foreground">
+                                    Best time to visit
+                                  </div>
+                                  <div className="font-medium">
+                                    {data.info.best_time_to_visit}
+                                  </div>
+                                </div>
+                              )}
+                              {data.info.biodiversity && (
+                                <div>
+                                  <div className="text-muted-foreground">
+                                    Biodiversity
+                                  </div>
+                                  <div className="font-medium">
+                                    {data.info.biodiversity}
+                                  </div>
+                                </div>
+                              )}
+                              {data.info.cultural_note && (
+                                <div className="sm:col-span-2">
+                                  <div className="text-muted-foreground">
+                                    Cultural note
+                                  </div>
+                                  <div className="font-medium">
+                                    {data.info.cultural_note}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {Array.isArray(data.info.highlights) &&
+                              data.info.highlights.length > 0 && (
+                                <div>
+                                  <div className="text-sm text-muted-foreground mb-2">
+                                    Highlights
+                                  </div>
+                                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                                    {data.info.highlights.map((h) => (
+                                      <li key={h}>{h}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            {Array.isArray(data.info.nearby_attractions) &&
+                              data.info.nearby_attractions.length > 0 && (
+                                <div>
+                                  <div className="text-sm text-muted-foreground mb-2">
+                                    Nearby attractions
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {data.info.nearby_attractions.map((a) => (
+                                      <span
+                                        key={a}
+                                        className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium"
+                                      >
+                                        {a}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            {Array.isArray(data.info.local_tips) &&
+                              data.info.local_tips.length > 0 && (
+                                <div>
+                                  <div className="text-sm text-muted-foreground mb-2">
+                                    Local tips
+                                  </div>
+                                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                                    {data.info.local_tips.map((t) => (
+                                      <li key={t}>{t}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            No additional information available.
+                          </p>
+                        )}
+                      </DialogContent>
+                    </Dialog>
                     {data.trend === "up" ? (
                       <TrendingUp className="h-4 w-4 text-green-500" />
                     ) : (
@@ -202,14 +335,14 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <CardDescription>
-                  Water Quality Index: {data.wqi}/100
+                  Water Quality Index: {(data.wqiText || data.wqi)}/100
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>WQI Score</span>
-                    <span>{data.wqi}/100</span>
+                    <span>{(data.wqiText || data.wqi)}/100</span>
                   </div>
                   <Progress value={data.wqi} className="h-2" />
                 </div>
@@ -219,7 +352,7 @@ export default function Dashboard() {
                     <Zap className="h-4 w-4 text-blue-500" />
                     <div>
                       <div className="text-muted-foreground">pH Level</div>
-                      <div className="font-medium">{data.ph}</div>
+                      <div className="font-medium">{data.phText || data.ph}</div>
                     </div>
                   </div>
 
@@ -227,7 +360,7 @@ export default function Dashboard() {
                     <Droplets className="h-4 w-4 text-blue-500" />
                     <div>
                       <div className="text-muted-foreground">Oxygen (mg/L)</div>
-                      <div className="font-medium">{data.oxygen}</div>
+                      <div className="font-medium">{data.oxygenText || data.oxygen}</div>
                     </div>
                   </div>
 
@@ -237,7 +370,7 @@ export default function Dashboard() {
                       <div className="text-muted-foreground">
                         Temperature (°C)
                       </div>
-                      <div className="font-medium">{data.temperature}</div>
+                      <div className="font-medium">{data.temperatureText || data.temperature}</div>
                     </div>
                   </div>
 
@@ -247,7 +380,7 @@ export default function Dashboard() {
                       <div className="text-muted-foreground">
                         Turbidity (NTU)
                       </div>
-                      <div className="font-medium">{data.turbidity}</div>
+                      <div className="font-medium">{data.turbidityText || data.turbidity}</div>
                     </div>
                   </div>
                 </div>

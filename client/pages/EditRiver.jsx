@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { addRiver, generateSlug } from "@/lib/rivers";
+import { getRivers, upsertRiver, generateSlug } from "@/lib/rivers";
 
 function isAdmin() {
   try {
@@ -21,20 +21,23 @@ function isAdmin() {
   }
 }
 
-export default function AddRiver() {
+export default function EditRiver() {
   const navigate = useNavigate();
+  const { slug } = useParams();
   const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    name: "",
-    wqi: "",
-    status: "Moderate",
-    ph: "",
-    oxygen: "",
-    temperature: "",
-    turbidity: "",
-    trend: "up",
-    locations: "",
-  });
+  const rivers = useMemo(() => getRivers(), []);
+  const existing = rivers.find((r) => r.slug === slug);
+
+  const [form, setForm] = useState(() => ({
+    name: existing?.location || "",
+    wqi: existing?.wqiText || existing?.wqi?.toString?.() || "",
+    status: existing?.status || "Moderate",
+    ph: existing?.phText || existing?.ph?.toString?.() || "",
+    oxygen: existing?.oxygenText || existing?.oxygen?.toString?.() || "",
+    temperature: existing?.temperatureText || existing?.temperature?.toString?.() || "",
+    turbidity: existing?.turbidityText || existing?.turbidity?.toString?.() || "",
+    trend: existing?.trend || "up",
+  }));
 
   useEffect(() => {
     if (!isAdmin()) {
@@ -42,24 +45,29 @@ export default function AddRiver() {
     }
   }, [navigate]);
 
+  if (!existing) {
+    return (
+      <div className="p-6">
+        <Card className="max-w-xl mx-auto">
+          <CardHeader>
+            <CardTitle>Not found</CardTitle>
+            <CardDescription>
+              The river you are trying to edit does not exist.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate("/dashboard/admin")}>
+              Back to Admin
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const normalizePh = (val) => {
-    const raw = String(val ?? "").trim();
-    if (!raw) return { numeric: 7, text: "" };
-    const m = raw.match(/(-?\d+(?:\.\d+)?)(?:\s*[-–—]\s*(-?\d+(?:\.\d+)?))?/);
-    if (m) {
-      const a = parseFloat(m[1]);
-      const b = m[2] != null ? parseFloat(m[2]) : NaN;
-      const hasRange = /[-–—]/.test(raw) && !isNaN(a) && !isNaN(b);
-      const numeric = hasRange ? (a + b) / 2 : a;
-      const text = hasRange ? raw : "";
-      return { numeric: isNaN(numeric) ? 7 : numeric, text };
-    }
-    return { numeric: 7, text: raw };
   };
 
   const normalizeRangeOrNumber = (val, fallback) => {
@@ -86,7 +94,7 @@ export default function AddRiver() {
     if (!form.name) return setError("Name is required");
     if (!form.wqi) return setError("WQI is required");
 
-    const river = {
+    const updated = {
       slug: generateSlug(form.name),
       location: form.name,
       ...(function(){ const { numeric, text } = normalizeRangeOrNumber(form.wqi, 50); return { wqi: Number(numeric), wqiText: text }; })(),
@@ -98,7 +106,8 @@ export default function AddRiver() {
       trend: form.trend,
     };
 
-    addRiver(river);
+    // Use original slug to update in place without creating a copy
+    upsertRiver(updated, slug);
     navigate("/dashboard/admin");
   };
 
@@ -106,9 +115,10 @@ export default function AddRiver() {
     <div className="p-6">
       <Card className="max-w-xl mx-auto">
         <CardHeader>
-          <CardTitle>Add River</CardTitle>
+          <CardTitle>Edit River</CardTitle>
           <CardDescription>
-            Enter river details. Only admins can add rivers.
+            Updating <span className="font-medium">{existing.location}</span> (
+            {slug})
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -225,8 +235,15 @@ export default function AddRiver() {
               </select>
             </div>
 
-            <div className="pt-2 flex justify-end">
-              <Button type="submit">Add River</Button>
+            <div className="pt-2 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Save Changes</Button>
             </div>
           </form>
         </CardContent>
