@@ -44,24 +44,18 @@ const alerts = [
   {
     id: 2,
     type: "info",
-    location: "Godavari",
-    message: "Dissolved oxygen levels improved across upstream sites.",
+    location: "Mithi River",
+    message: "Water quality shows improvement after recent cleanup drive.",
     time: "3 hours ago",
   },
   {
     id: 3,
     type: "warning",
-    location: "Krishna",
-    message: "Slight pH fluctuation observed near agricultural discharge.",
+    location: "Mithi River",
+    message: "High turbidity detected near BKC section.",
     time: "7 hours ago",
   },
-  {
-    id: 4,
-    type: "info",
-    location: "Tapi",
-    message: "WQI stable with minor seasonal temperature variation.",
-    time: "12 hours ago",
-  },
+
 ];
 
 function getStatusColor(status) {

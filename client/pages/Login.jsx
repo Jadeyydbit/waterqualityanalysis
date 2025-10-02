@@ -15,7 +15,7 @@ import {
 import { Waves, Droplets } from "lucide-react";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,13 +25,13 @@ export default function Login() {
     setIsLoading(true);
 
     // TODO: Connect to backend API
-    console.log("Login attempt:", { email, password, rememberMe });
+    console.log("Login attempt:", { username, password, rememberMe });
 
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       try {
-        const role = /admin/i.test(email) ? "admin" : "user";
+        const role = /admin/i.test(username) ? "admin" : "user";
         localStorage.setItem("role", role);
       } catch (e) {}
       // Redirect to dashboard on success
@@ -54,7 +54,7 @@ export default function Login() {
 
         <Card className="w-full shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+            <CardTitle className="text-2xl text-center">Welcome</CardTitle>
             <CardDescription className="text-center">
               Sign in to your account to access the water quality dashboard
             </CardDescription>
@@ -62,15 +62,16 @@ export default function Login() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="h-11"
+                  autoComplete="off"
                 />
               </div>
               <div className="space-y-2">
@@ -83,6 +84,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="h-11"
+                  autoComplete="off"
                 />
               </div>
               <div className="flex items-center justify-between">

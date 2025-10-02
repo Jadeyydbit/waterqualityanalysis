@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 3000,
     proxy: {
       "/api": "http://127.0.0.1:5000", // 🔑 This is the key line for forwarding API calls
     },
