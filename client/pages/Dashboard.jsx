@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import WaterQualityPredictor from "../components/WaterQualityPredictor";
+import WaterQualityCharts from "../components/WaterQualityCharts";
 import {
   Card,
   CardContent,
@@ -31,8 +33,6 @@ import {
   Info,
 } from "lucide-react";
 
-// Rivers are loaded from localStorage so admin add/delete reflects here
-
 const alerts = [
   {
     id: 1,
@@ -55,11 +55,10 @@ const alerts = [
     message: "High turbidity detected near BKC section.",
     time: "7 hours ago",
   },
-
 ];
 
 function getStatusColor(status) {
-  switch (status.toLowerCase()) {
+  switch (status?.toLowerCase()) {
     case "excellent":
       return "bg-green-500";
     case "good":
@@ -89,11 +88,18 @@ function getAlertVariant(type) {
 export default function Dashboard() {
   const [visibleAlerts, setVisibleAlerts] = useState([]);
   const [rivers, setRivers] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   useEffect(() => {
     const shuffled = [...alerts].sort(() => Math.random() - 0.5);
     setVisibleAlerts(shuffled.slice(0, 2));
     setRivers(getRivers());
+
+    fetch("http://localhost:8000/api/locations/")
+      .then((res) => res.json())
+      .then((data) => setLocations(data.locations || []))
+      .catch(() => setLocations([]));
 
     const handleAny = (e) => {
       if (!e || e.type === "rivers:updated" || e.key === "rivers") {
@@ -113,12 +119,140 @@ export default function Dashboard() {
   const avgWqi = useMemo(() => {
     if (!rivers.length) return 0;
     return Math.round(
-      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length,
+      rivers.reduce((sum, r) => sum + (Number(r.wqi) || 0), 0) / rivers.length
     );
   }, [rivers]);
 
   return (
     <div className="p-6 space-y-6">
+      {/* Know the WQI - Linear Regression Prediction Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Know the WQI</CardTitle>
+          <CardDescription>
+            Enter water sample features to predict Water Quality Index using Linear Regression
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <KnowWQIForm />
+        </CardContent>
+      </Card>
+
+      {/* River Insights Section - Beautiful Static Graphs and Maps */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>River Insights</CardTitle>
+          <CardDescription>
+            Advanced analytics and visualizations powered by Seaborn & Matplotlib
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div>
+              <div className="font-semibold mb-2">WQI Over Years</div>
+              <img src="http://localhost:8000/api/graph-wqi-over-years/" alt="WQI Over Years" className="rounded shadow border" />
+            </div>
+            <div>
+              <div className="font-semibold mb-2">Feature Correlation Heatmap</div>
+              <img src="http://localhost:8000/api/graph-feature-heatmap/" alt="Feature Correlation Heatmap" className="rounded shadow border" />
+            </div>
+            <div>
+              <div className="font-semibold mb-2">WQI Boxplot by Location</div>
+              <img src="http://localhost:8000/api/graph-wqi-boxplot/" alt="WQI Boxplot by Location" className="rounded shadow border" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <div className="font-semibold mb-2">Monitoring Locations Map</div>
+              <img src="http://localhost:8000/api/map-locations/" alt="Monitoring Locations Map" className="rounded shadow border" />
+            </div>
+            <div>
+              <div className="font-semibold mb-2">Pollution Heatmap</div>
+              <img src="http://localhost:8000/api/map-pollution-heatmap/" alt="Pollution Heatmap" className="rounded shadow border" />
+            </div>
+            <div>
+              <div className="font-semibold mb-2">Active Monitoring Sites</div>
+              <img src="http://localhost:8000/api/map-monitoring-sites/" alt="Active Monitoring Sites" className="rounded shadow border" />
+            </div>
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">
+            <strong>Did you know?</strong> <br />
+            <ul className="list-disc pl-5">
+              <li>Seaborn makes it easy to spot trends and correlations in water data.</li>
+              <li>Boxplots reveal outliers and variability in river quality.</li>
+              <li>Heatmaps help you find which features most affect WQI.</li>
+              <li>Maps help visualize monitoring sites and pollution hotspots.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Persona Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardHeader>
+            <CardTitle>ML Enthusiast</CardTitle>
+            <CardDescription>
+              Dive into the data! Explore model predictions, feature importances, and try your own experiments.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc pl-5 space-y-2 text-sm">
+              <li>See live ML predictions for water quality.</li>
+              <li>Check out interactive charts and stats.</li>
+              <li>Fun fact: Random Forests are great for tabular water data!</li>
+              <li>Try changing input values to see prediction changes.</li>
+            </ul>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardHeader>
+            <CardTitle>Water Quality Knower</CardTitle>
+            <CardDescription>
+              Stay informed about river health, alerts, and citizen reports.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc pl-5 space-y-2 text-sm">
+              <li>Monitor real-time water quality index (WQI).</li>
+              <li>Get alerts for pollution and improvement events.</li>
+              <li>Fun fact: Turbidity spikes often follow heavy rainfall!</li>
+              <li>Report pollution events as a citizen scientist.</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Location Dropdown */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Monitoring Location</CardTitle>
+          <CardDescription>
+            Select a location from the CSV file
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {locations.length === 0 ? (
+            <span className="text-muted-foreground">No locations found.</span>
+          ) : (
+            <select
+              className="border rounded px-3 py-2 w-full max-w-xs"
+              value={selectedLocation}
+              onChange={e => setSelectedLocation(e.target.value)}
+            >
+              <option value="" disabled>Select location...</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ML Classifier and Charts */}
+      <WaterQualityPredictor />
+      <WaterQualityCharts />
+
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -386,3 +520,83 @@ export default function Dashboard() {
     </div>
   );
 }
+
+// KnowWQIForm: Linear Regression Prediction Form
+function KnowWQIForm() {
+  const [inputs, setInputs] = useState({
+    Temp: '',
+    DO: '',
+    pH: '',
+    TDS: '',
+    BOD: '',
+    COD: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  function handleChange(e) {
+    setInputs({ ...inputs, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await fetch('http://localhost:8000/api/predict-wqi-linear/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs),
+      });
+      const data = await res.json();
+      if (res.ok && data.predicted_wqi !== undefined) {
+        setResult(data.predicted_wqi);
+      } else {
+        setError(data.error || 'Prediction failed');
+      }
+    } catch (err) {
+      setError('Network error');
+    }
+    setLoading(false);
+  }
+
+  return (
+    <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {Object.entries(inputs).map(([key, value]) => (
+          <div key={key}>
+            <label className="block text-sm font-medium mb-1" htmlFor={key}>{key}</label>
+            <input
+              type="number"
+              step="any"
+              name={key}
+              id={key}
+              value={value}
+              onChange={handleChange}
+              className="border rounded px-3 py-2 w-full"
+              required
+            />
+          </div>
+        ))}
+      </div>
+      <Button type="submit" disabled={loading}>
+        {loading ? 'Predicting...' : 'Predict WQI'}
+      </Button>
+      {result !== null && (
+        <Alert variant="default" className="mt-4">
+          <AlertDescription>
+            <strong>Predicted WQI:</strong> {result}
+          </AlertDescription>
+        </Alert>
+      )}
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+    </form>
+  );
+}
+  // ...existing code ends here. No stray text below this line.

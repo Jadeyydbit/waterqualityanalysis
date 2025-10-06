@@ -148,3 +148,9 @@ const App = () => (
 );
 
 createRoot(document.getElementById("root")).render(<App />);
+import ResetPassword from "@/pages/ResetPassword";
+
+<Routes>
+  {/* Other routes */}
+  <Route path="/reset-password" element={<ResetPassword />} />
+</Routes>

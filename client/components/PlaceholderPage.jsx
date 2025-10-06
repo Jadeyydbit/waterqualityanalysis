@@ -17,7 +17,7 @@ export default function PlaceholderPage({ title, description, icon }) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            This page is currently under development. Would you like me to implement it?
+            This page is currently under development.
           </p>
           <Button variant="outline" className="w-full">
             Request Implementation

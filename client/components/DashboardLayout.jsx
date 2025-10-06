@@ -1,3 +1,4 @@
+// client/components/DashboardLayout.jsx
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,27 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import {
-  Waves,
-  Home,
-  FileText,
-  Map,
-  Calendar,
-  Newspaper,
-  Settings,
-  LogOut,
-  Menu,
-  Sun,
-  Moon,
-  Users,
-} from "lucide-react";
+import { Waves, Home, FileText, Map, Calendar, Newspaper, Settings, LogOut, Menu, Sun, Moon, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const baseNavigation = [
@@ -45,9 +28,7 @@ export default function DashboardLayout({ children }) {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [role, setRole] = useState(
-    () => localStorage.getItem("role") || "user",
-  );
+  const [role, setRole] = useState(() => localStorage.getItem("role") || "user");
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -55,9 +36,7 @@ export default function DashboardLayout({ children }) {
   };
 
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("role");
-    } catch (e) {}
+    localStorage.removeItem("role");
     window.location.href = "/login";
   };
 
@@ -71,38 +50,31 @@ export default function DashboardLayout({ children }) {
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-2">
-        {[
-          ...baseNavigation,
-          ...(role === "admin"
-            ? [{ name: "Admin", href: "/dashboard/admin", icon: Users }]
-            : []),
-        ].map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-white"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800",
-              )}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.name}
-            </Link>
-          );
-        })}
+        {[...baseNavigation, ...(role === "admin" ? [{ name: "Admin", href: "/dashboard/admin", icon: Users }] : [])].map(
+          (item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-white"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+                )}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                {item.name}
+              </Link>
+            );
+          }
+        )}
       </nav>
 
       <div className="p-4 border-t">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3"
-          onClick={handleLogout}
-        >
+        <Button variant="ghost" className="w-full justify-start gap-3" onClick={handleLogout}>
           <LogOut className="w-5 h-5" />
           Sign out
         </Button>
@@ -135,42 +107,22 @@ export default function DashboardLayout({ children }) {
             <div className="flex items-center gap-4">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="lg:hidden"
-                    onClick={() => setSidebarOpen(true)}
-                  >
+                  <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
                     <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
               </Sheet>
-
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Water Quality Dashboard
-              </h1>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Water Quality Dashboard</h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="relative"
-              >
-                {isDarkMode ? (
-                  <Sun className="w-5 h-5" />
-                ) : (
-                  <Moon className="w-5 h-5" />
-                )}
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
-                  >
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt="User" />
                       <AvatarFallback>JD</AvatarFallback>
@@ -180,12 +132,8 @@ export default function DashboardLayout({ children }) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        John Doe
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        john@example.com
-                      </p>
+                      <p className="text-sm font-medium leading-none">John Doe</p>
+                      <p className="text-xs leading-none text-muted-foreground">john@example.com</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

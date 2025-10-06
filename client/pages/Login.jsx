@@ -1,5 +1,7 @@
+// client/pages/Login.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,58 +26,65 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // TODO: Connect to backend API
-    console.log("Login attempt:", { username, password, rememberMe });
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/api/login/", {
+        username,
+        password,
+      });
 
-    // Simulate API call
-    setTimeout(() => {
+      if (res.data && res.data.success) {
+        localStorage.setItem("role", res.data.role || "user");
+        window.location.href = "/dashboard";
+      } else {
+        alert(res.data?.error || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(error?.response?.data?.error || "Login failed");
+    } finally {
       setIsLoading(false);
-      try {
-        const role = /admin/i.test(username) ? "admin" : "user";
-        localStorage.setItem("role", role);
-      } catch (e) {}
-      // Redirect to dashboard on success
-      window.location.href = "/dashboard";
-    }, 1000);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-water-50 via-white to-nature-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
-            <Waves className="w-8 h-8 text-white" />
+        {/* Logo and Title */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full shadow-lg mb-4 animate-pulse">
+            <Waves className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            River Monitor
-          </h1>
-          <p className="text-gray-600">Protecting our water resources</p>
+          <h1 className="text-4xl font-extrabold text-blue-900 mb-2">Water Quality Monitor</h1>
+          <p className="text-blue-700">Protecting our rivers and water resources</p>
         </div>
 
-        <Card className="w-full shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Welcome</CardTitle>
-            <CardDescription className="text-center">
-              Sign in to your account to access the water quality dashboard
+        {/* Login Card */}
+        <Card className="w-full shadow-2xl rounded-2xl overflow-hidden">
+          <CardHeader className="bg-blue-50 p-6 text-center">
+            <CardTitle className="text-2xl font-bold text-blue-900">Welcome Back</CardTitle>
+            <CardDescription className="text-blue-700">
+              Sign in to monitor water quality across your region
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username" className="font-medium text-blue-800">Username</Label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder="your username"
+                  placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-12 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                   autoComplete="off"
                 />
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="font-medium text-blue-800">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -83,10 +92,11 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-12 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                   autoComplete="off"
                 />
               </div>
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -94,41 +104,43 @@ export default function Login() {
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked)}
                   />
-                  <Label htmlFor="remember" className="text-sm font-normal">
+                  <Label htmlFor="remember" className="text-sm text-blue-700 font-medium">
                     Remember me
                   </Label>
                 </div>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-blue-600 hover:underline"
                 >
                   Forgot password?
                 </Link>
               </div>
+
               <Button
                 type="submit"
-                className="w-full h-11"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <Droplets className="w-4 h-4 animate-pulse" />
-                    <span>Signing in...</span>
-                  </div>
+                  <>
+                    <Droplets className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
                 ) : (
-                  "Sign in"
+                  "Sign In"
                 )}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="text-center">
-            <p className="text-sm text-gray-600 w-full">
-              Don't have an account?{" "}
+
+          <CardFooter className="bg-blue-50 text-center py-4">
+            <p className="text-sm text-blue-700">
+              Don&apos;t have an account?{" "}
               <Link
                 to="/register"
-                className="text-primary hover:underline font-medium"
+                className="text-blue-800 font-semibold hover:underline"
               >
-                Sign up
+                Sign Up
               </Link>
             </p>
           </CardFooter>

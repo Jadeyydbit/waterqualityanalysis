@@ -6,9 +6,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 3000,
-    proxy: {
-      "/api": "http://127.0.0.1:5000", // 🔑 This is the key line for forwarding API calls
-    },
+      proxy: {
+        "/api": "http://127.0.0.1:8000", // Updated to Django backend port
+      },
     hmr: { overlay: false },
     fs: {
       allow: ["./client", "./shared","./"],
