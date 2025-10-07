@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import WaterQualityPredictor from "../components/WaterQualityPredictor";
+import WaterQualityCharts from "../components/WaterQualityCharts";
 import {
   Card,
   CardContent,
@@ -18,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { getRivers } from "@/lib/rivers";
+// import { getRivers } from "@/lib/rivers";
 import {
   Droplets,
   Thermometer,
@@ -95,25 +97,27 @@ function getAlertVariant(type) {
 export default function Dashboard() {
   const [visibleAlerts, setVisibleAlerts] = useState([]);
   const [rivers, setRivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const shuffled = [...alerts].sort(() => Math.random() - 0.5);
     setVisibleAlerts(shuffled.slice(0, 2));
-    setRivers(getRivers());
-
-    const handleAny = (e) => {
-      if (!e || e.type === "rivers:updated" || e.key === "rivers") {
-        setRivers(getRivers());
-      }
-    };
-    window.addEventListener("rivers:updated", handleAny);
-    window.addEventListener("storage", handleAny);
-    window.addEventListener("focus", handleAny);
-    return () => {
-      window.removeEventListener("rivers:updated", handleAny);
-      window.removeEventListener("storage", handleAny);
-      window.removeEventListener("focus", handleAny);
-    };
+    setLoading(true);
+    setError(null);
+    fetch("/api/rivers/")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch river data");
+        return res.json();
+      })
+      .then((data) => {
+        setRivers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load rivers");
+        setLoading(false);
+      });
   }, []);
 
   const avgWqi = useMemo(() => {
@@ -123,8 +127,12 @@ export default function Dashboard() {
     );
   }, [rivers]);
 
+  if (loading) return <div className="p-6">Loading river data...</div>;
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
   return (
     <div className="p-6 space-y-6">
+      <WaterQualityPredictor />
+      <WaterQualityCharts />
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>

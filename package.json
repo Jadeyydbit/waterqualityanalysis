@@ -11,18 +11,18 @@
     ]
   },
   "scripts": {
-    "dev": "concurrently \"vite\" \"cd server && venv\\Scripts\\python.exe app.py\"",
+  "dev": "vite",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "cd server && npm run build",
-    "start": "node server.js",
+    "start": "npm run dev",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.7",
-    "axios": "^1.11.0",
+    "axios": "^1.12.2",
     "body-parser": "^1.20.3",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",

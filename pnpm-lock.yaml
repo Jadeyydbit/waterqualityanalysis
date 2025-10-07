@@ -12,8 +12,8 @@ importers:
         specifier: ^2.20.7
         version: 2.20.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: ^1.11.0
-        version: 1.12.1
+        specifier: ^1.12.2
+        version: 1.12.2
       body-parser:
         specifier: ^1.20.3
         version: 1.20.3
@@ -1850,8 +1850,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  axios@1.12.1:
-    resolution: {integrity: sha512-Kn4kbSXpkFHCGE6rBFNwIv0GQs4AvDT80jlveJDKFxjbTYMUeB4QtsdPCv6H8Cm19Je7IU6VFtRl2zWZI0rudQ==}
+  axios@1.12.2:
+    resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -5134,7 +5134,7 @@ snapshots:
       postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
-  axios@1.12.1:
+  axios@1.12.2:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.4
@@ -6570,7 +6570,7 @@ snapshots:
 
   twilio@4.23.0:
     dependencies:
-      axios: 1.12.1
+      axios: 1.12.2
       dayjs: 1.11.18
       https-proxy-agent: 5.0.1
       jsonwebtoken: 9.0.2

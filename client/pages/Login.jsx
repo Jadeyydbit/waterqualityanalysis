@@ -15,7 +15,7 @@ import {
 import { Waves, Droplets } from "lucide-react";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,20 +23,24 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // TODO: Connect to backend API
-    console.log("Login attempt:", { email, password, rememberMe });
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
       setIsLoading(false);
-      try {
-        const role = /admin/i.test(email) ? "admin" : "user";
-        localStorage.setItem("role", role);
-      } catch (e) {}
-      // Redirect to dashboard on success
-      window.location.href = "/dashboard";
-    }, 1000);
+      if (response.ok && data.success) {
+        localStorage.setItem("role", data.role);
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.error || "Login failed");
+      }
+    } catch (e) {
+      setIsLoading(false);
+      alert("Login failed");
+    }
   };
 
   return (
@@ -62,13 +66,13 @@ export default function Login() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="h-11"
                 />
