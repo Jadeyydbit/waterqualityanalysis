@@ -25,6 +25,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+<<<<<<< HEAD
 
     try {
       const res = await axios.post("http://127.0.0.1:8000/api/login/", {
@@ -33,16 +34,38 @@ export default function Login() {
       });
 
       if (res.data && res.data.success) {
-        localStorage.setItem("role", res.data.role || "user");
-        window.location.href = "/dashboard";
-      } else {
-        alert(res.data?.error || "Login failed");
+      const response = await fetch("/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      setIsLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
       alert(error?.response?.data?.error || "Login failed");
     } finally {
       setIsLoading(false);
+=======
+    try {
+      const response = await fetch("/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      setIsLoading(false);
+      if (response.ok && data.success) {
+        localStorage.setItem("role", data.role);
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.error || "Login failed");
+      }
+    } catch (e) {
+      setIsLoading(false);
+      alert("Login failed");
+>>>>>>> 133dc760c975bd992d26361a3f3abead18cba716
     }
   };
 
@@ -58,12 +81,20 @@ export default function Login() {
           <p className="text-blue-700">Protecting our rivers and water resources</p>
         </div>
 
+<<<<<<< HEAD
         {/* Login Card */}
         <Card className="w-full shadow-2xl rounded-2xl overflow-hidden">
           <CardHeader className="bg-blue-50 p-6 text-center">
             <CardTitle className="text-2xl font-bold text-blue-900">Welcome Back</CardTitle>
             <CardDescription className="text-blue-700">
               Sign in to monitor water quality across your region
+=======
+        <Card className="w-full shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+            <CardDescription className="text-center">
+              Sign in to your account to access the water quality dashboard
+>>>>>>> 133dc760c975bd992d26361a3f3abead18cba716
             </CardDescription>
           </CardHeader>
 
@@ -78,8 +109,12 @@ export default function Login() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+<<<<<<< HEAD
                   className="h-12 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                   autoComplete="off"
+=======
+                  className="h-11"
+>>>>>>> 133dc760c975bd992d26361a3f3abead18cba716
                 />
               </div>
 
@@ -92,8 +127,12 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+<<<<<<< HEAD
                   className="h-12 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                   autoComplete="off"
+=======
+                  className="h-11"
+>>>>>>> 133dc760c975bd992d26361a3f3abead18cba716
                 />
               </div>
 
