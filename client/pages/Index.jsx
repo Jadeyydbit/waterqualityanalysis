@@ -132,6 +132,40 @@ export default function Index() {
     }
   };
 
+  // --- Classifier Demo Widget ---
+  const [classifierInput, setClassifierInput] = useState(0);
+  const [classifierResult, setClassifierResult] = useState(null);
+  const runClassifier = async () => {
+    try {
+      const response = await fetch("/api/classifier-predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wqi: classifierInput })
+      });
+      const data = await response.json();
+      setClassifierResult(data.result);
+    } catch (err) {
+      setClassifierResult("Error");
+    }
+  };
+
+  // --- Linear Regression Demo Widget ---
+  const [regressionInput, setRegressionInput] = useState(0);
+  const [regressionResult, setRegressionResult] = useState(null);
+  const runRegression = async () => {
+    try {
+      const response = await fetch("/api/linear-regression-predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: regressionInput })
+      });
+      const data = await response.json();
+      setRegressionResult(data.prediction);
+    } catch (err) {
+      setRegressionResult("Error");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 className="text-3xl font-bold text-blue-600">Welcome to River Monitor</h1>
@@ -139,6 +173,8 @@ export default function Index() {
       {exampleFromServer && (
         <p className="mt-2 text-green-600">Server says: {exampleFromServer}</p>
       )}
+
+      {/* ML prediction and classifier widgets are now on their own page. Access them from the dashboard ML Prediction option. */}
     </div>
   );
 }

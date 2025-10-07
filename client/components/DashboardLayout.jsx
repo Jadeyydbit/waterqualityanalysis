@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 
 const baseNavigation = [
   { name: "Home", href: "/dashboard", icon: Home },
+  { name: "ML Classifier", href: "/dashboard/ml-predictor", icon: FileText },
+  { name: "ML Regression", href: "/dashboard/ml-regression", icon: FileText },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Maps", href: "/dashboard/maps", icon: Map },
   { name: "Cleanup Drives", href: "/dashboard/cleanup", icon: Calendar },

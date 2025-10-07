@@ -19,6 +19,8 @@ import DashboardLayout from "./components/DashboardLayout";
 import PlaceholderPage from "./components/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import Maps from "./pages/Maps";
+import MLPredictor from "./pages/MLPredictor";
+import MLRegression from "./pages/MLRegression";
 
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
@@ -42,6 +44,24 @@ const App = () => (
             element={
               <DashboardLayout>
                 <Dashboard />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/ml-predictor"
+            element={
+              <DashboardLayout>
+                <MLPredictor />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/ml-regression"
+            element={
+              <DashboardLayout>
+                <MLRegression />
               </DashboardLayout>
             }
           />
@@ -147,10 +167,5 @@ const App = () => (
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")).render(<App />);
-import ResetPassword from "@/pages/ResetPassword";
 
-<Routes>
-  {/* Other routes */}
-  <Route path="/reset-password" element={<ResetPassword />} />
-</Routes>
+createRoot(document.getElementById("root")).render(<App />);
