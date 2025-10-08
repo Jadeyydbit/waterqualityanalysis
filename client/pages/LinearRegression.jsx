@@ -261,24 +261,45 @@ export default function LinearRegression() {
                 </div>
 
                 {/* Prediction Info */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">🎯 What will be predicted:</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-blue-700">
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      <strong>WQI</strong> - Water Quality Index
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                  <h4 className="font-bold text-blue-800 mb-4 text-lg flex items-center">
+                    🎯 What will be predicted:
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-green-200">
+                      <div className="flex items-center mb-2">
+                        <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                        <h5 className="font-bold text-green-700 text-lg">WQI</h5>
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Water Quality Index</p>
+                      <p className="text-xs text-gray-500 mt-1">Overall water quality assessment score (0-100)</p>
                     </div>
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                      <strong>TDS</strong> - Total Dissolved Solids
+                    
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-200">
+                      <div className="flex items-center mb-2">
+                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                        <h5 className="font-bold text-blue-700 text-lg">TDS</h5>
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Total Dissolved Solids</p>
+                      <p className="text-xs text-gray-500 mt-1">Concentration of dissolved substances (mg/L)</p>
                     </div>
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                      <strong>BOD</strong> - Biochemical Oxygen Demand
+                    
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-200">
+                      <div className="flex items-center mb-2">
+                        <span className="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                        <h5 className="font-bold text-orange-700 text-lg">BOD</h5>
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Biochemical Oxygen Demand</p>
+                      <p className="text-xs text-gray-500 mt-1">Oxygen required by microorganisms (mg/L)</p>
                     </div>
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                      <strong>COD</strong> - Chemical Oxygen Demand
+                    
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-red-200">
+                      <div className="flex items-center mb-2">
+                        <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                        <h5 className="font-bold text-red-700 text-lg">COD</h5>
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Chemical Oxygen Demand</p>
+                      <p className="text-xs text-gray-500 mt-1">Oxygen needed to oxidize organic matter (mg/L)</p>
                     </div>
                   </div>
                 </div>

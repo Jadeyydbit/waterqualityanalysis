@@ -7,10 +7,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Index from "./pages/Index";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
+import Reports from "./pages/Reports";
+import Cleanup from "./pages/Cleanup";
+import News from "./pages/News";
 import RiverDetails from "./pages/RiverDetails";
 import Admin from "./pages/Admin";
 import AddRiver from "./pages/AddRiver";
@@ -38,7 +42,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -49,6 +53,16 @@ const App = () => (
             element={
               <DashboardLayout>
                 <Dashboard />
+              </DashboardLayout>
+            }
+          />
+          
+          {/* Demo Dashboard Route */}
+          <Route
+            path="/demo"
+            element={
+              <DashboardLayout demoMode={true}>
+                <Dashboard demoMode={true} />
               </DashboardLayout>
             }
           />
@@ -120,11 +134,25 @@ const App = () => (
             path="/dashboard/reports"
             element={
               <DashboardLayout>
-                <PlaceholderPage
-                  title="Pollution Reports"
-                  description="Citizens can report garbage and pollution with text and image uploads here."
-                  icon={<FileText className="w-8 h-8 text-muted-foreground" />}
-                />
+                <Reports />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/cleanup"
+            element={
+              <DashboardLayout>
+                <Cleanup />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/news"
+            element={
+              <DashboardLayout>
+                <News />
               </DashboardLayout>
             }
           />

@@ -14,6 +14,39 @@ export default function Login() {
   const [fishPositions, setFishPositions] = useState([]);
   const navigate = useNavigate();
 
+  // Predefined admin accounts
+  const adminAccounts = [
+    { 
+      username: "admin", 
+      email: "admin@mithiriver.com", 
+      password: "admin123", 
+      name: "System Administrator",
+      role: "admin" 
+    },
+    { 
+      username: "supervisor", 
+      email: "supervisor@mithiriver.com", 
+      password: "super123", 
+      name: "Water Quality Supervisor",
+      role: "admin" 
+    },
+    { 
+      username: "moderator", 
+      email: "moderator@mithiriver.com", 
+      password: "mod123", 
+      name: "Community Moderator",
+      role: "admin" 
+    }
+  ];
+
+  // Function to check if user is admin
+  const checkAdminCredentials = (username, password) => {
+    return adminAccounts.find(admin => 
+      (admin.username === username || admin.email === username) && 
+      admin.password === password
+    );
+  };
+
   useEffect(() => {
     // Generate animated ripples
     const createRipples = () => {

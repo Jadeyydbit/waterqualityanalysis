@@ -3,9 +3,14 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function Dashboard() {
+export default function Dashboard({ demoMode = false }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [waterDrops, setWaterDrops] = useState([]);
+
+  // Demo mode alert function
+  const showDemoAlert = () => {
+    alert("🔐 Please register to access full features and functionality. This is a demo version with limited access.");
+  };
 
   useEffect(() => {
     // Update time every second
@@ -88,6 +93,20 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-100 overflow-hidden">
+      {/* Demo Mode Banner */}
+      {demoMode && (
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-3 text-center shadow-lg">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg">🔍</span>
+            <span className="font-semibold">DEMO MODE</span>
+            <span className="text-sm">- Limited functionality. Register to unlock full features!</span>
+            <Link to="/register" className="ml-4 bg-white text-orange-600 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors">
+              Register Now
+            </Link>
+          </div>
+        </div>
+      )}
+      
       {/* Animated Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Floating Water Drops */}
@@ -227,11 +246,17 @@ export default function Dashboard() {
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Linear Regression</span>
                   <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">99.85% Accuracy</span>
                 </div>
-                <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
-                  <Link to="/dashboard/ml-predictor">
+                {demoMode ? (
+                  <Button onClick={showDemoAlert} className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
                     🚀 Launch ML Analytics
-                  </Link>
-                </Button>
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
+                    <Link to="/dashboard/ml-predictor">
+                      🚀 Launch ML Analytics
+                    </Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -260,11 +285,17 @@ export default function Dashboard() {
                     <div className="text-2xl font-bold text-green-700">2.4K</div>
                   </div>
                 </div>
-                <Button asChild className="w-full bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
-                  <Link to="/dashboard/maps">
+                {demoMode ? (
+                  <Button onClick={showDemoAlert} className="w-full bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
                     🗺️ View Live Maps
-                  </Link>
-                </Button>
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
+                    <Link to="/dashboard/maps">
+                      🗺️ View Live Maps
+                    </Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -293,11 +324,17 @@ export default function Dashboard() {
                     <div className="text-2xl font-bold text-purple-700">2</div>
                   </div>
                 </div>
-                <Button asChild className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
-                  <Link to="/dashboard/gis-mapping">
+                {demoMode ? (
+                  <Button onClick={showDemoAlert} className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
                     🚀 Launch GIS System
-                  </Link>
-                </Button>
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
+                    <Link to="/dashboard/gis-mapping">
+                      🚀 Launch GIS System
+                    </Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -320,20 +357,35 @@ export default function Dashboard() {
                   { name: "ML Predictor", icon: "🤖", href: "/dashboard/ml-predictor", color: "bg-purple-600" },
                   { name: "System Settings", icon: "⚙️", href: "/dashboard/settings", color: "bg-orange-500" }
                 ].map((action, index) => (
-                  <Button
-                    key={action.name}
-                    asChild
-                    variant="outline"
-                    className="h-20 flex flex-col gap-2 hover:scale-105 transition-all duration-300 border-2 hover:shadow-lg group"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <Link to={action.href}>
+                  demoMode ? (
+                    <Button
+                      key={action.name}
+                      onClick={showDemoAlert}
+                      variant="outline"
+                      className="h-20 flex flex-col gap-2 hover:scale-105 transition-all duration-300 border-2 hover:shadow-lg group"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
                       <div className={`w-8 h-8 ${action.color} text-white rounded-full flex items-center justify-center text-lg group-hover:animate-bounce`}>
                         {action.icon}
                       </div>
                       <span className="text-sm font-medium">{action.name}</span>
-                    </Link>
-                  </Button>
+                    </Button>
+                  ) : (
+                    <Button
+                      key={action.name}
+                      asChild
+                      variant="outline"
+                      className="h-20 flex flex-col gap-2 hover:scale-105 transition-all duration-300 border-2 hover:shadow-lg group"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <Link to={action.href}>
+                        <div className={`w-8 h-8 ${action.color} text-white rounded-full flex items-center justify-center text-lg group-hover:animate-bounce`}>
+                          {action.icon}
+                        </div>
+                        <span className="text-sm font-medium">{action.name}</span>
+                      </Link>
+                    </Button>
+                  )
                 ))}
               </div>
             </CardContent>
