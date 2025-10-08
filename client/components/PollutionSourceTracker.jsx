@@ -194,9 +194,9 @@ const PollutionSourceTracker = React.memo(() => {
     }, []);
 
     return (
-      <div className="relative bg-gradient-to-br from-blue-100 via-cyan-50 to-teal-100 rounded-xl p-4 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-blue-100 via-cyan-50 to-teal-100 rounded-xl p-4 overflow-hidden w-full h-full min-h-[300px] border border-gray-200 shadow-inner">
         {/* River representation */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 300">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
           {/* River path */}
           <path
             d="M 50 250 Q 150 200 250 180 Q 350 160 450 150"
@@ -391,7 +391,7 @@ const PollutionSourceTracker = React.memo(() => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
+              <div className="h-96 w-full">
                 <PollutionFlowMap />
               </div>
             </CardContent>
