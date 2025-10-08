@@ -1,117 +1,126 @@
-import React, { useState } from "react";
-import WaterQualityCharts from "../components/WaterQualityCharts";
-import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-function Section({ title, children }) {
-  return (
-    <section className="mb-8">
-      <h2 className="text-2xl font-bold mb-4 text-blue-900 dark:text-blue-300 animate-fade-in">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
 export default function MLPredictor() {
-  // Classifier states
-  const [clfYear, setClfYear] = useState("");
-  const [clfLocation, setClfLocation] = useState("");
-  const [clfTemp, setClfTemp] = useState("");
-  const [clfDO, setClfDO] = useState("");
-  const [clfPH, setClfPH] = useState("");
-  const [clfTDS, setClfTDS] = useState("");
-  const [clfBOD, setClfBOD] = useState("");
-  const [clfCOD, setClfCOD] = useState("");
-  const [classifierResult, setClassifierResult] = useState(null);
-  const [showResult, setShowResult] = useState(false);
-
-  // Classifier handler
-  const runClassifier = async (e) => {
-    e.preventDefault();
-    const payload = {
-      Year: clfYear,
-      Location: clfLocation,
-      Temp: clfTemp,
-      DO: clfDO,
-      pH: clfPH,
-      TDS: clfTDS,
-      BOD: clfBOD,
-      COD: clfCOD,
-    };
-    try {
-      const response = await fetch("/api/predict/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      setClassifierResult(data.predicted_WQI || data.error || "Error");
-      setShowResult(true);
-    } catch (err) {
-      setClassifierResult("Error");
-      setShowResult(true);
-    }
-  };
-
-  // Animated river background
-  const riverBg = (
-    <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
-      <svg className="w-full h-full animate-wave" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#60a5fa" fillOpacity="0.5" d="M0,160L60,165.3C120,171,240,181,360,186.7C480,192,600,192,720,186.7C840,181,960,171,1080,176C1200,181,1320,203,1380,213.3L1440,224L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-        <path fill="#3b82f6" fillOpacity="0.7" d="M0,224L60,218.7C120,213,240,203,360,186.7C480,171,600,149,720,154.7C840,160,960,192,1080,186.7C1200,181,1320,139,1380,117.3L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-      </svg>
-    </div>
-  );
-
   return (
-    <div className="relative p-4 max-w-2xl mx-auto space-y-8 min-h-[80vh] flex flex-col justify-center items-center">
-      {riverBg}
-      <Section title="WQI Classifier">
-        <Card className="shadow-xl border-2 border-blue-200 bg-white/80 backdrop-blur-lg animate-fade-in">
-          <CardContent>
-            <form onSubmit={runClassifier} className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <input type="text" value={clfYear} onChange={e => setClfYear(e.target.value)} placeholder="Year" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfLocation} onChange={e => setClfLocation(e.target.value)} placeholder="Location" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfTemp} onChange={e => setClfTemp(e.target.value)} placeholder="Temp" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfDO} onChange={e => setClfDO(e.target.value)} placeholder="DO" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfPH} onChange={e => setClfPH(e.target.value)} placeholder="pH" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfTDS} onChange={e => setClfTDS(e.target.value)} placeholder="TDS" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfBOD} onChange={e => setClfBOD(e.target.value)} placeholder="BOD" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
-                <input type="text" value={clfCOD} onChange={e => setClfCOD(e.target.value)} placeholder="COD" className="border p-2 rounded focus:ring-2 focus:ring-blue-400 transition-all duration-300" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-teal-50 p-8">
+      <div className="container mx-auto max-w-4xl">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            🌊 Mithi River Water Quality AI
+          </h1>
+          <p className="text-xl text-gray-700">
+            Choose your preferred ML analysis method
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <Card className="shadow-xl bg-white/95 hover:scale-105 transition-all">
+            <CardHeader className="bg-gradient-to-r from-green-500 to-green-700 text-white">
+              <CardTitle className="text-2xl text-center">
+                🏷️ WQI Classifier
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🌊</div>
+                  <h3 className="text-xl font-bold mb-2">Water Quality Classification</h3>
+                  <p className="text-gray-600 text-sm">
+                    Classify water quality: Excellent, Good, Moderate, Poor, Very Poor
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-800 mb-2">📊 Inputs:</h4>
+                  <div className="text-sm text-green-700">
+                    Year, Location, Temperature, DO, pH, TDS, BOD, COD
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-green-600 hover:bg-green-700">
+                  <Link to="/dashboard/wqi-classifier">
+                    🚀 Launch Classifier
+                  </Link>
+                </Button>
               </div>
-              <Button type="submit" className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-2 rounded shadow-lg hover:scale-105 transition-transform duration-300">Predict WQI</Button>
-            </form>
-            <WaterQualityCharts data={{ Temp: clfTemp, DO: clfDO, pH: clfPH, TDS: clfTDS, BOD: clfBOD, COD: clfCOD }} />
-            {showResult && (
-              <div className="mt-4 animate-pop text-center">
-                <span className="text-lg font-bold text-blue-700">Predicted WQI:</span>
-                <span className="ml-2 text-2xl font-extrabold text-green-600 drop-shadow-lg">{classifierResult}</span>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-xl bg-white/95 hover:scale-105 transition-all">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
+              <CardTitle className="text-2xl text-center">
+                🔮 Linear Regression
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🔬</div>
+                  <h3 className="text-xl font-bold mb-2">Pollutant Prediction</h3>
+                  <p className="text-gray-600 text-sm">
+                    Predict pollutant concentrations (TDS, BOD, COD)
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-800 mb-2">📊 Inputs:</h4>
+                  <div className="text-sm text-blue-700">
+                    Year, Location, Temperature, DO, pH
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Link to="/dashboard/linear-regression">
+                    🚀 Launch Predictor
+                  </Link>
+                </Button>
               </div>
-            )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="shadow-xl bg-white/95">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-700 text-white">
+            <CardTitle className="text-2xl text-center">
+              ⚖️ Model Comparison
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">Feature</th>
+                    <th className="text-center py-3 px-4 text-green-700">🏷️ Classifier</th>
+                    <th className="text-center py-3 px-4 text-blue-700">🔮 Regression</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Parameters</td>
+                    <td className="py-3 px-4 text-center">8</td>
+                    <td className="py-3 px-4 text-center">5</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Output</td>
+                    <td className="py-3 px-4 text-center">WQI Category</td>
+                    <td className="py-3 px-4 text-center">Numerical Values</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Accuracy</td>
+                    <td className="py-3 px-4 text-center">99.85%</td>
+                    <td className="py-3 px-4 text-center">99%+</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-medium">Best For</td>
+                    <td className="py-3 px-4 text-center">Policy Decisions</td>
+                    <td className="py-3 px-4 text-center">Research</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
-      </Section>
-      {/* Animated river effect styles */}
-      <style>{`
-        .animate-wave { animation: waveMove 8s linear infinite; }
-        @keyframes waveMove {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-100px); }
-        }
-        .animate-fade-in { animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1) both; }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-pop { animation: popIn 0.7s cubic-bezier(.4,0,.2,1) both; }
-        @keyframes popIn {
-          0% { opacity: 0; transform: scale(0.7); }
-          80% { opacity: 1; transform: scale(1.1); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
+      </div>
     </div>
   );
 }
-// ...existing code...

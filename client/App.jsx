@@ -22,6 +22,8 @@ import NotFound from "./pages/NotFound";
 import Maps from "./pages/Maps";
 import MLPredictor from "./pages/MLPredictor";
 import MLRegression from "./pages/MLRegression";
+import WQIClassifier from "./pages/WQIClassifier";
+import LinearRegression from "./pages/LinearRegression";
 
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
@@ -63,6 +65,24 @@ const App = () => (
             element={
               <DashboardLayout>
                 <MLRegression />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/wqi-classifier"
+            element={
+              <DashboardLayout>
+                <WQIClassifier />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/linear-regression"
+            element={
+              <DashboardLayout>
+                <LinearRegression />
               </DashboardLayout>
             }
           />

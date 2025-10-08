@@ -47,11 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,9 +61,27 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
+
+# CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # since React is separate frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
@@ -87,16 +107,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'waterquality',
-        'USER': 'postgres',
-        'PASSWORD': 'jaden_10xd',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
-# Print PostgreSQL connection status and backend running message
+# Uncomment below to use PostgreSQL in production
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'waterquality',
+#         'USER': 'postgres',
+#         'PASSWORD': 'jaden_10xd',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+# Print database connection status and backend running message
 import sys
 if 'runserver' in sys.argv:
     from django.db import connections
@@ -104,9 +132,9 @@ if 'runserver' in sys.argv:
     db_conn = connections['default']
     try:
         db_conn.cursor()
-        print('\nPostgreSQL database connected successfully.')
+        print('\nSQLite database connected successfully.')
     except OperationalError:
-        print('\nFailed to connect to PostgreSQL database.')
+        print('\nFailed to connect to SQLite database.')
     print('Backend running!')
 
 

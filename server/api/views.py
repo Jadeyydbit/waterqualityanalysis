@@ -218,10 +218,222 @@ def signup(request):
     user.save()
     
     return Response({'success': True, 'email': user.email})
-from django.contrib.auth import authenticate
-# Login API endpoint
+from django.contrib.auth import authenticate, login as django_login
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.core.mail import send_mail
+from django.conf import settings
+
+# Django Admin Login API endpoint
 @api_view(['POST'])
+@csrf_exempt
 def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response({'message': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Authenticate with Django's built-in authentication
+    user = authenticate(username=username, password=password)
+    
+    if user is not None:
+        if user.is_active:
+            # Create or get token for the user
+            token, created = Token.objects.get_or_create(user=user)
+            
+            return Response({
+                'success': True,
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser,
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'User account is disabled.'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        return Response({'message': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+# Django User Registration API endpoint with welcome email
+@api_view(['POST'])
+@csrf_exempt
+def register(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    
+    if not username or not email or not password:
+        return Response({'message': 'Username, email, and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if username or email already exists
+    if User.objects.filter(username=username).exists():
+        return Response({'message': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if User.objects.filter(email=email).exists():
+        return Response({'message': 'Email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Create new user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        
+        # Send welcome email
+        subject = 'Welcome to Water Quality Analysis Platform! 🌊'
+        message = f"""
+Dear {first_name or username},
+
+Welcome to the Water Quality Analysis Platform! 🎉
+
+Thank you for joining our mission to protect and monitor water quality across India's rivers and water bodies.
+
+Your Account Details:
+• Username: {username}
+• Email: {email}
+• Registration Date: {user.date_joined.strftime('%B %d, %Y')}
+
+What you can do now:
+🔍 Monitor water quality data from 1,200+ rivers
+📊 Access real-time water quality reports
+🌍 Contribute to environmental protection efforts
+📈 View detailed analytics and trends
+👥 Join our community of water guardians
+
+Your login credentials are secure and you can start exploring the platform immediately.
+
+Visit our platform: http://localhost:3000/login
+
+Together, we're making a difference for our planet's most precious resource! 💧
+
+Best regards,
+The Water Quality Analysis Team
+
+---
+This is an automated message. Please do not reply to this email.
+For support, contact us through the platform.
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            email_sent = False
+            print(f"Email sending failed: {e}")
+        
+        # Create token for immediate login capability
+        token, created = Token.objects.get_or_create(user=user)
+        
+        return Response({
+            'success': True,
+            'message': 'Registration successful!' + (' Welcome email sent.' if email_sent else ' (Email sending failed)'),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            },
+            'token': token.key
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({'message': f'Registration failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Forgot Password API endpoint
+@api_view(['POST'])
+@csrf_exempt
+def forgot_password(request):
+    email = request.data.get('email')
+    
+    if not email:
+        return Response({'message': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Check if user exists
+        user = User.objects.get(email=email)
+        
+        # Generate password reset token
+        token, created = Token.objects.get_or_create(user=user)
+        
+        # Send password reset email
+        subject = 'Reset Your Water Quality Analysis Account Password 🔒'
+        message = f"""
+Dear {user.first_name or user.username},
+
+You requested to reset your password for the Water Quality Analysis Platform.
+
+Reset Instructions:
+• Click the link below to reset your password
+• This link will expire in 24 hours for security reasons
+• If you didn't request this reset, please ignore this email
+
+Reset Link: http://localhost:3001/reset-password?token={token.key}&email={email}
+
+Security Tips:
+🔐 Choose a strong password (at least 8 characters)
+🛡️ Don't share your login credentials
+🔍 Always log out from shared computers
+
+If you're having trouble accessing your account, contact our support team through the platform.
+
+Best regards,
+The Water Quality Analysis Team
+
+---
+This is an automated security message.
+For support, contact us through the platform.
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            email_sent = False
+            print(f"Email sending failed: {e}")
+        
+        return Response({
+            'success': True,
+            'message': 'Password reset instructions sent to your email!' if email_sent else 'User found but email sending failed.',
+        }, status=status.HTTP_200_OK)
+        
+    except User.DoesNotExist:
+        # Don't reveal whether user exists for security
+        return Response({
+            'success': True,
+            'message': 'If an account with that email exists, you will receive reset instructions.',
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': f'Password reset failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Custom UserRegister Login (keeping for backward compatibility)
+@api_view(['POST'])
+def custom_login(request):
     email = request.data.get('email')
     password = request.data.get('password')
     try:
