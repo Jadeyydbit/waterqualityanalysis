@@ -206,7 +206,7 @@ export default function Dashboard() {
           </div>
 
           {/* Action Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             {/* ML Predictor Card */}
             <Card className="group relative overflow-hidden shadow-2xl border-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-xl hover:scale-105 transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -267,6 +267,39 @@ export default function Dashboard() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* GIS System Card */}
+            <Card className="group relative overflow-hidden shadow-2xl border-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 backdrop-blur-xl hover:scale-105 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <CardHeader className="relative z-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <CardTitle className="text-2xl flex items-center gap-3">
+                  <span className="text-3xl animate-pulse">🗺️</span>
+                  Advanced GIS System
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="p-8 relative z-10">
+                <p className="text-gray-600 mb-6 text-lg">
+                  Interactive mapping system with sensor networks, field team tracking, geofencing, and spatial analysis.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-indigo-50 p-3 rounded-lg">
+                    <div className="text-sm text-indigo-600 font-medium">Sensor Network</div>
+                    <div className="text-2xl font-bold text-indigo-700">6</div>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="text-sm text-purple-600 font-medium">Field Teams</div>
+                    <div className="text-2xl font-bold text-purple-700">2</div>
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
+                  <Link to="/dashboard/gis-mapping">
+                    🚀 Launch GIS System
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Quick Actions */}
@@ -278,11 +311,13 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {[
                   { name: "Add River Data", icon: "➕", href: "/dashboard/add-river", color: "bg-blue-500" },
+                  { name: "GIS Mapping", icon: "🗺️", href: "/dashboard/gis-mapping", color: "bg-indigo-500" },
                   { name: "Generate Report", icon: "📊", href: "/dashboard/reports", color: "bg-green-500" },
                   { name: "View Analytics", icon: "📈", href: "/dashboard/analytics", color: "bg-purple-500" },
+                  { name: "ML Predictor", icon: "🤖", href: "/dashboard/ml-predictor", color: "bg-purple-600" },
                   { name: "System Settings", icon: "⚙️", href: "/dashboard/settings", color: "bg-orange-500" }
                 ].map((action, index) => (
                   <Button

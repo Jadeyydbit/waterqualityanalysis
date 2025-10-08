@@ -50,6 +50,107 @@ def load_ml_models():
 # Load models when module is imported
 load_ml_models()
 
+def calculate_wqi(temperature, dissolved_oxygen, ph, tds, bod, cod):
+    """
+    Calculate Water Quality Index (WQI) based on water quality parameters
+    Uses a weighted approach based on Indian water quality standards
+    """
+    
+    # Parameter weights (importance factors)
+    weights = {
+        'pH': 0.12,
+        'DO': 0.17,
+        'TDS': 0.19,
+        'BOD': 0.22,
+        'COD': 0.19,
+        'Temp': 0.11
+    }
+    
+    # Calculate sub-indices for each parameter
+    # pH (optimal range: 6.5-8.5)
+    if 6.5 <= ph <= 8.5:
+        ph_index = 100
+    elif 6.0 <= ph < 6.5 or 8.5 < ph <= 9.0:
+        ph_index = 80
+    elif 5.5 <= ph < 6.0 or 9.0 < ph <= 9.5:
+        ph_index = 60
+    elif 5.0 <= ph < 5.5 or 9.5 < ph <= 10.0:
+        ph_index = 40
+    else:
+        ph_index = 20
+    
+    # Dissolved Oxygen (optimal: >6 mg/L)
+    if dissolved_oxygen >= 6:
+        do_index = 100
+    elif dissolved_oxygen >= 4:
+        do_index = 80
+    elif dissolved_oxygen >= 2:
+        do_index = 60
+    elif dissolved_oxygen >= 1:
+        do_index = 40
+    else:
+        do_index = 20
+    
+    # TDS (optimal: <500 mg/L)
+    if tds <= 500:
+        tds_index = 100
+    elif tds <= 1000:
+        tds_index = 80
+    elif tds <= 2000:
+        tds_index = 60
+    elif tds <= 3000:
+        tds_index = 40
+    else:
+        tds_index = 20
+    
+    # BOD (optimal: <3 mg/L)
+    if bod <= 3:
+        bod_index = 100
+    elif bod <= 6:
+        bod_index = 80
+    elif bod <= 12:
+        bod_index = 60
+    elif bod <= 20:
+        bod_index = 40
+    else:
+        bod_index = 20
+    
+    # COD (optimal: <20 mg/L)
+    if cod <= 20:
+        cod_index = 100
+    elif cod <= 40:
+        cod_index = 80
+    elif cod <= 80:
+        cod_index = 60
+    elif cod <= 120:
+        cod_index = 40
+    else:
+        cod_index = 20
+    
+    # Temperature (optimal: 20-30°C)
+    if 20 <= temperature <= 30:
+        temp_index = 100
+    elif 15 <= temperature < 20 or 30 < temperature <= 35:
+        temp_index = 80
+    elif 10 <= temperature < 15 or 35 < temperature <= 40:
+        temp_index = 60
+    elif 5 <= temperature < 10 or 40 < temperature <= 45:
+        temp_index = 40
+    else:
+        temp_index = 20
+    
+    # Calculate weighted WQI
+    wqi = (
+        weights['pH'] * ph_index +
+        weights['DO'] * do_index +
+        weights['TDS'] * tds_index +
+        weights['BOD'] * bod_index +
+        weights['COD'] * cod_index +
+        weights['Temp'] * temp_index
+    )
+    
+    return max(0, min(100, wqi))  # Ensure WQI is between 0 and 100
+
 @api_view(['POST'])
 def predict_water_quality(request):
     """
@@ -108,6 +209,10 @@ def predict_water_quality(request):
             model = ml_models['regression_models'][target]
             prediction = model.predict(features_scaled)[0]
             predictions[target] = round(float(prediction), 2)
+        
+        # Calculate Water Quality Index (WQI) based on predicted values
+        wqi = calculate_wqi(temp, do_val, ph, predictions['TDS'], predictions['BOD'], predictions['COD'])
+        predictions['WQI'] = round(float(wqi), 1)
         
         return Response({
             'success': True,

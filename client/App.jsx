@@ -24,6 +24,8 @@ import MLPredictor from "./pages/MLPredictor";
 import MLRegression from "./pages/MLRegression";
 import WQIClassifier from "./pages/WQIClassifier";
 import LinearRegression from "./pages/LinearRegression";
+import GISMapping from "./pages/GISMapping";
+import AIAnalytics from "./pages/AIAnalytics";
 
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
@@ -83,6 +85,24 @@ const App = () => (
             element={
               <DashboardLayout>
                 <LinearRegression />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/gis-mapping"
+            element={
+              <DashboardLayout>
+                <GISMapping />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/ai-analytics"
+            element={
+              <DashboardLayout>
+                <AIAnalytics />
               </DashboardLayout>
             }
           />

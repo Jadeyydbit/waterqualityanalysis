@@ -152,10 +152,10 @@ export default function LinearRegression() {
           <Card className="shadow-2xl border-2 border-white/50 bg-white/90 backdrop-blur-xl animate-fade-in">
             <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-t-lg">
               <CardTitle className="text-2xl font-bold text-center">
-                🔬 Predict Pollutant Concentrations
+                🔬 Predict Water Quality & Pollutants
               </CardTitle>
               <p className="text-center text-white/90 mt-2">
-                Enter basic parameters to predict TDS, BOD & COD levels
+                Enter basic parameters to predict WQI, TDS, BOD & COD levels
               </p>
             </CardHeader>
             <CardContent className="p-6">
@@ -263,7 +263,11 @@ export default function LinearRegression() {
                 {/* Prediction Info */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="font-semibold text-blue-800 mb-2">🎯 What will be predicted:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-blue-700">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-blue-700">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                      <strong>WQI</strong> - Water Quality Index
+                    </div>
                     <div className="flex items-center">
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                       <strong>TDS</strong> - Total Dissolved Solids
@@ -297,7 +301,7 @@ export default function LinearRegression() {
                     {isLoading ? (
                       <>⏳ Processing...</>
                     ) : (
-                      <>🔬 Predict Pollutants</>
+                      <>🔬 Predict WQI & Pollutants</>
                     )}
                   </Button>
                 </div>
@@ -337,10 +341,28 @@ export default function LinearRegression() {
                     <div className="space-y-6">
                       <div className="text-center">
                         <h3 className="text-2xl font-bold text-blue-800 mb-4">
-                          📊 Predicted Pollutant Levels for {formData.location}
+                          📊 Predicted Water Quality & Pollutant Levels for {formData.location}
                         </h3>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* WQI Prediction Card */}
+                        <div className="text-center bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg border-2 border-green-200">
+                          <div className="text-3xl mb-2">🌊</div>
+                          <div className="text-sm font-medium text-gray-600 mb-2">Water Quality Index</div>
+                          <div className="text-3xl font-bold text-green-600 mb-1">
+                            {predictorResult.WQI ? predictorResult.WQI.toFixed(1) : 'N/A'}
+                          </div>
+                          <div className="text-sm text-gray-500">Index Score</div>
+                          <div className="mt-2 text-xs text-gray-500">
+                            {predictorResult.WQI ? (
+                              predictorResult.WQI >= 90 ? 'Excellent Quality' :
+                              predictorResult.WQI >= 70 ? 'Good Quality' :
+                              predictorResult.WQI >= 50 ? 'Moderate Quality' :
+                              predictorResult.WQI >= 25 ? 'Poor Quality' : 'Very Poor Quality'
+                            ) : 'Not Available'}
+                          </div>
+                        </div>
+                        
                         <div className="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-lg border-2 border-blue-200">
                           <div className="text-3xl mb-2">💧</div>
                           <div className="text-sm font-medium text-gray-600 mb-2">Total Dissolved Solids</div>
@@ -386,7 +408,21 @@ export default function LinearRegression() {
                       {/* Environmental Impact Assessment */}
                       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
                         <h4 className="font-semibold text-green-800 mb-3">🌱 Environmental Impact Assessment:</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          {/* WQI Overall Assessment */}
+                          <div className={`p-3 rounded-lg ${
+                            predictorResult.WQI >= 90 ? 'bg-green-100 text-green-700' :
+                            predictorResult.WQI >= 70 ? 'bg-blue-100 text-blue-700' :
+                            predictorResult.WQI >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                            predictorResult.WQI >= 25 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            <strong>WQI Overall:</strong><br/>
+                            {predictorResult.WQI >= 90 ? 'Excellent water quality' :
+                             predictorResult.WQI >= 70 ? 'Good water quality' :
+                             predictorResult.WQI >= 50 ? 'Moderate water quality' :
+                             predictorResult.WQI >= 25 ? 'Poor water quality' : 'Very poor water quality'}
+                          </div>
+                          
                           <div className={`p-3 rounded-lg ${
                             predictorResult.TDS > 2000 ? 'bg-red-100 text-red-700' : 
                             predictorResult.TDS > 1000 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'

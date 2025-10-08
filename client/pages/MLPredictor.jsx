@@ -57,9 +57,9 @@ export default function MLPredictor() {
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="text-6xl mb-4">🔬</div>
-                  <h3 className="text-xl font-bold mb-2">Pollutant Prediction</h3>
+                  <h3 className="text-xl font-bold mb-2">Water Quality Prediction</h3>
                   <p className="text-gray-600 text-sm">
-                    Predict pollutant concentrations (TDS, BOD, COD)
+                    Predict WQI, TDS, BOD, and COD values
                   </p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
@@ -103,7 +103,7 @@ export default function MLPredictor() {
                   <tr className="border-b">
                     <td className="py-3 px-4 font-medium">Output</td>
                     <td className="py-3 px-4 text-center">WQI Category</td>
-                    <td className="py-3 px-4 text-center">Numerical Values</td>
+                    <td className="py-3 px-4 text-center">WQI + TDS, BOD, COD</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-3 px-4 font-medium">Accuracy</td>
