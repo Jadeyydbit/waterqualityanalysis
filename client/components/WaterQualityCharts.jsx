@@ -9,6 +9,9 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
+  LineElement,
+  PointElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -18,7 +21,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler,
+  LineElement,
+  PointElement
 );
 
 const COLORS = ["#22c55e", "#facc15", "#f87171", "#60a5fa", "#a78bfa"];

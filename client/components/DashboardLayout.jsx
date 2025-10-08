@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "🏠 Home", href: "/dashboard", icon: Home },
+  { name: "✨ Advanced Features", href: "/dashboard/advanced-features", icon: FileText },
   { name: "🤖 ML Analytics", href: "/dashboard/ml-predictor", icon: FileText },
   { name: "🧠 AI Analytics", href: "/dashboard/ai-analytics", icon: FileText },
   { name: "🏷️ WQI Classifier", href: "/dashboard/wqi-classifier", icon: FileText },

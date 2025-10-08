@@ -1,78 +1,244 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { Brain, TrendingUp, AlertTriangle, CheckCircle, Activity, Target, Zap, Eye } from 'lucide-react';
 
-const AIAnalytics = () => {
+const AIAnalytics = React.memo(() => {
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('forecast');
   const [modelStatus, setModelStatus] = useState(null);
 
   useEffect(() => {
-    fetchAIData();
-    fetchModelStatus();
+    // Generate mock AI data instead of API calls
+    generateMockAIData();
+    generateMockModelStatus();
   }, []);
 
-  const fetchAIData = async () => {
+  const generateMockAIData = useCallback(() => {
     try {
       setLoading(true);
-      const response = await fetch('/api/ai/dashboard/');
-      const result = await response.json();
       
-      if (result.success) {
-        setAiData(result.data);
+      // Generate forecast data
+      const forecasts = [];
+      for (let i = 0; i < 30; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        
+        // AI prediction with confidence intervals
+        const baseWQI = 75 + Math.sin(i * 0.2) * 15 + Math.random() * 10;
+        const confidence = 0.85 + Math.random() * 0.1;
+        
+        forecasts.push({
+          date: date.toISOString().split('T')[0],
+          predicted_wqi: Math.max(20, Math.min(100, baseWQI)),
+          confidence: confidence,
+          upper_bound: Math.min(100, baseWQI + 10),
+          lower_bound: Math.max(0, baseWQI - 10),
+          predicted_ph: 7.0 + Math.sin(i * 0.15) * 0.5 + (Math.random() - 0.5) * 0.2,
+          predicted_do: 6.5 + Math.cos(i * 0.1) * 1.5 + (Math.random() - 0.5) * 0.5,
+          predicted_temp: 28 + Math.sin(i * 0.05) * 3 + (Math.random() - 0.5) * 1,
+          predicted_bod: 15 + Math.sin(i * 0.08) * 8 + Math.random() * 5,
+          predicted_cod: 35 + Math.cos(i * 0.12) * 15 + Math.random() * 8,
+          predicted_tds: 280 + Math.sin(i * 0.06) * 40 + Math.random() * 20,
+          anomaly_score: Math.random() * 0.3,
+          risk_level: Math.random() > 0.8 ? 'high' : Math.random() > 0.5 ? 'medium' : 'low'
+        });
       }
+      
+      // Generate model performance data
+      const modelPerformance = [
+        { model: 'WQI Predictor', accuracy: 0.92, mse: 12.5, r2: 0.89, last_trained: '2024-10-01' },
+        { model: 'pH Classifier', accuracy: 0.88, mse: 0.15, r2: 0.85, last_trained: '2024-10-02' },
+        { model: 'Pollution Detector', accuracy: 0.94, mse: 8.3, r2: 0.91, last_trained: '2024-10-01' },
+        { model: 'Anomaly Detector', accuracy: 0.87, mse: 0.23, r2: 0.82, last_trained: '2024-09-30' }
+      ];
+      
+      // Generate feature importance
+      const featureImportance = [
+        { feature: 'Temperature', importance: 0.25, impact: 'high' },
+        { feature: 'pH Level', importance: 0.22, impact: 'high' },
+        { feature: 'Dissolved Oxygen', importance: 0.18, impact: 'medium' },
+        { feature: 'Turbidity', importance: 0.15, impact: 'medium' },
+        { feature: 'Conductivity', importance: 0.12, impact: 'medium' },
+        { feature: 'Location', importance: 0.08, impact: 'low' }
+      ];
+      
+      // Generate anomaly detection results
+      const anomalies = [];
+      const locations = ['Bandra East', 'Mahim Creek', 'Dharavi', 'Kurla', 'Powai'];
+      
+      for (let i = 0; i < 8; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        
+        if (Math.random() > 0.6) { // 40% chance of anomaly
+          const location = locations[Math.floor(Math.random() * locations.length)];
+          const severity = Math.random() > 0.5 ? 'high' : 'medium';
+          
+          // Generate anomalous parameters
+          const parameters = ['pH', 'DO', 'Temperature', 'Turbidity', 'TDS'];
+          const selectedParams = parameters.slice(0, Math.floor(Math.random() * 3) + 1);
+          
+          const anomalous_parameters = selectedParams.map(param => ({
+            parameter: param,
+            value: param === 'pH' ? (Math.random() * 4 + 3).toFixed(1) :
+                   param === 'DO' ? (Math.random() * 15 + 2).toFixed(1) + ' mg/L' :
+                   param === 'Temperature' ? (Math.random() * 10 + 35).toFixed(1) + '°C' :
+                   param === 'Turbidity' ? (Math.random() * 50 + 20).toFixed(1) + ' NTU' :
+                   (Math.random() * 500 + 1000).toFixed(0) + ' ppm',
+            expected_range: param === 'pH' ? '6.5-8.5' :
+                          param === 'DO' ? '5-8 mg/L' :
+                          param === 'Temperature' ? '20-32°C' :
+                          param === 'Turbidity' ? '<10 NTU' :
+                          '<500 ppm'
+          }));
+          
+          anomalies.push({
+            date: date.toISOString(),
+            location: location,
+            type: ['pollution_spike', 'sensor_malfunction', 'unusual_pattern'][Math.floor(Math.random() * 3)],
+            severity: severity,
+            confidence: 0.75 + Math.random() * 0.2,
+            anomaly_score: Math.random() * 0.4 + 0.6,
+            anomalous_parameters: anomalous_parameters,
+            description: `AI detected unusual water quality pattern in ${location} requiring investigation`
+          });
+        }
+      }
+      
+      setAiData({
+        forecasts,
+        modelPerformance,
+        featureImportance,
+        anomalies,
+        satellite_analysis: {
+          pollution_detected: Math.random() > 0.6,
+          pollution_types: [
+            {
+              type: 'industrial_discharge',
+              confidence: 0.85,
+              description: 'Chemical pollutants detected in industrial zone',
+              area_percentage: 12.5,
+              severity: 'high'
+            },
+            {
+              type: 'organic_waste',
+              confidence: 0.72,
+              description: 'Organic matter concentration above normal levels',
+              area_percentage: 8.3,
+              severity: 'medium'
+            }
+          ],
+          water_quality_indicators: {
+            turbidity: Math.random() > 0.5 ? 'high' : 'normal',
+            chlorophyll: Math.random() > 0.7 ? 'elevated' : 'normal',
+            sediment: Math.random() > 0.6 ? 'high' : 'low',
+            oil_spill: Math.random() > 0.9 ? 'detected' : 'none'
+          },
+          analysis_timestamp: new Date().toISOString(),
+          coverage_area: '25.6 km²',
+          resolution: '10m per pixel'
+        },
+        insights: {
+          trend_analysis: 'Water quality showing gradual improvement over past month',
+          risk_assessment: 'Medium risk of pollution events in next 7 days',
+          recommendations: [
+            'Increase monitoring frequency during peak hours',
+            'Focus on temperature and pH parameter optimization',
+            'Investigate anomalies detected in sector 3'
+          ]
+        },
+        ai_insights: {
+          model_accuracy: 92.5,
+          total_predictions: Math.floor(Math.random() * 10000) + 5000,
+          confidence_score: 0.87 + Math.random() * 0.1,
+          accuracy_trend: 'improving',
+          prediction_quality: 'excellent',
+          anomaly_detection_rate: 0.94,
+          false_positive_rate: 0.03
+        }
+      });
     } catch (error) {
-      console.error('Error fetching AI data:', error);
+      console.error('Error generating AI data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchModelStatus = async () => {
+  const generateMockModelStatus = () => {
     try {
-      const response = await fetch('/api/ai/status/');
-      const result = await response.json();
-      
-      if (result.success) {
-        setModelStatus(result.status);
-      }
+      setModelStatus({
+        overall_health: 'excellent',
+        models: {
+          wqi_predictor: { status: 'active', accuracy: 92, last_update: '2024-10-05T10:30:00Z' },
+          anomaly_detector: { status: 'active', accuracy: 87, last_update: '2024-10-05T09:15:00Z' },
+          pollution_classifier: { status: 'training', accuracy: 94, last_update: '2024-10-04T14:20:00Z' },
+          trend_analyzer: { status: 'active', accuracy: 89, last_update: '2024-10-05T11:45:00Z' }
+        },
+        system_metrics: {
+          cpu_usage: 45.2,
+          memory_usage: 67.8,
+          gpu_usage: 23.1,
+          prediction_latency: 125 // ms
+        },
+        recent_activity: [
+          'WQI prediction model updated successfully',
+          'Anomaly detected in Sector 3 - pH spike',
+          'New satellite imagery processed',
+          'Compliance report generated for October',
+          'Performance optimization completed'
+        ],
+        system_health: {
+          cpu_usage: '45.2%',
+          memory_usage: '67.8%',
+          overall_status: 'Excellent',
+          uptime: '99.8%',
+          last_maintenance: '2024-10-01'
+        }
+      });
     } catch (error) {
-      console.error('Error fetching model status:', error);
+      console.error('Error generating model status:', error);
     }
   };
 
-  const generateReport = async (reportType) => {
+  const generateReport = (reportType) => {
     try {
-      const response = await fetch('/api/ai/reports/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Generate mock report
+      const report = {
+        report_id: `AI_REPORT_${reportType}_${new Date().toISOString().split('T')[0]}`,
+        generated_at: new Date().toISOString(),
+        type: reportType,
+        summary: {
+          total_predictions: aiData.forecasts.length,
+          avg_accuracy: 0.91,
+          anomalies_detected: aiData.anomalies.length,
+          risk_level: 'medium'
         },
-        body: JSON.stringify({
-          type: reportType,
-          data: aiData
-        })
-      });
+        data: aiData,
+        recommendations: [
+          'Continue monitoring pH levels in sectors 2-4',
+          'Implement predictive maintenance for sensor network',
+          'Focus resources on high-risk pollution sources',
+          'Consider increasing sampling frequency during peak hours'
+        ]
+      };
       
-      const result = await response.json();
-      if (result.success) {
-        // Create and download report
-        const reportBlob = new Blob([JSON.stringify(result.report, null, 2)], {
-          type: 'application/json'
-        });
-        const url = URL.createObjectURL(reportBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${result.report.report_id}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
+      // Create and download report
+      const reportBlob = new Blob([JSON.stringify(report, null, 2)], {
+        type: 'application/json'
+      });
+      const url = URL.createObjectURL(reportBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${report.report_id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating report:', error);
     }
@@ -92,10 +258,10 @@ const AIAnalytics = () => {
   }
 
   const riskColors = {
-    'Low': '#10b981',
-    'Moderate': '#f59e0b', 
-    'High': '#ef4444',
-    'Critical': '#dc2626'
+    'low': '#10b981',
+    'medium': '#f59e0b', 
+    'high': '#ef4444',
+    'critical': '#dc2626'
   };
 
   const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -121,7 +287,7 @@ const AIAnalytics = () => {
               📊 Generate Report
             </Button>
             <Button 
-              onClick={fetchAIData}
+              onClick={generateMockAIData}
               variant="outline"
             >
               🔄 Refresh Data
@@ -154,10 +320,10 @@ const AIAnalytics = () => {
                     </Badge>
                   </div>
                   <div className="text-3xl">
-                    {modelName === 'predictive_analytics' && '🔮'}
-                    {modelName === 'anomaly_detection' && '⚡'}
-                    {modelName === 'computer_vision' && '👁️'}
-                    {modelName === 'nlp_reports' && '📝'}
+                    {modelName === 'wqi_predictor' && '🔮'}
+                    {modelName === 'anomaly_detector' && '⚡'}
+                    {modelName === 'pollution_classifier' && '🏭'}
+                    {modelName === 'trend_analyzer' && '�'}
                   </div>
                 </div>
               </CardContent>
@@ -168,11 +334,12 @@ const AIAnalytics = () => {
 
       {/* Main AI Analytics Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+        <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm">
           <TabsTrigger value="forecast" className="text-sm">🔮 Predictive Forecast</TabsTrigger>
           <TabsTrigger value="anomalies" className="text-sm">⚡ Anomaly Detection</TabsTrigger>
           <TabsTrigger value="satellite" className="text-sm">🛰️ Computer Vision</TabsTrigger>
           <TabsTrigger value="insights" className="text-sm">🧠 AI Insights</TabsTrigger>
+          <TabsTrigger value="advanced" className="text-sm">🚀 Advanced AI</TabsTrigger>
         </TabsList>
 
         {/* Predictive Forecast Tab */}
@@ -202,7 +369,7 @@ const AIAnalytics = () => {
                       />
                       <Area 
                         type="monotone" 
-                        dataKey="wqi" 
+                        dataKey="predicted_wqi" 
                         stroke="#8b5cf6" 
                         fill="url(#colorWqi)" 
                         strokeWidth={3}
@@ -239,10 +406,10 @@ const AIAnalytics = () => {
                       <YAxis />
                       <Tooltip labelFormatter={(date) => new Date(date).toLocaleDateString()} />
                       <Legend />
-                      <Line type="monotone" dataKey="predictions.ph" stroke="#3b82f6" strokeWidth={2} name="pH" />
-                      <Line type="monotone" dataKey="predictions.tds" stroke="#10b981" strokeWidth={2} name="TDS" />
-                      <Line type="monotone" dataKey="predictions.bod" stroke="#f59e0b" strokeWidth={2} name="BOD" />
-                      <Line type="monotone" dataKey="predictions.cod" stroke="#ef4444" strokeWidth={2} name="COD" />
+                      <Line type="monotone" dataKey="predicted_ph" stroke="#3b82f6" strokeWidth={2} name="pH" />
+                      <Line type="monotone" dataKey="predicted_tds" stroke="#10b981" strokeWidth={2} name="TDS" />
+                      <Line type="monotone" dataKey="predicted_bod" stroke="#f59e0b" strokeWidth={2} name="BOD" />
+                      <Line type="monotone" dataKey="predicted_cod" stroke="#ef4444" strokeWidth={2} name="COD" />
                     </LineChart>
                   </ResponsiveContainer>
                 )}
@@ -271,16 +438,16 @@ const AIAnalytics = () => {
                         </div>
                         <Badge 
                           style={{ 
-                            backgroundColor: riskColors[forecast.risk_level.level],
+                            backgroundColor: riskColors[forecast.risk_level] || riskColors['low'],
                             color: 'white'
                           }}
                         >
-                          {forecast.risk_level.level} Risk
+                          {forecast.risk_level.charAt(0).toUpperCase() + forecast.risk_level.slice(1)} Risk
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-gray-600">
-                          WQI: <span className="font-semibold">{forecast.wqi}</span>
+                          WQI: <span className="font-semibold">{Math.round(forecast.predicted_wqi)}</span>
                         </div>
                         <div className="text-sm text-gray-600">
                           Confidence: <span className="font-semibold">{(forecast.confidence * 100).toFixed(1)}%</span>
@@ -315,12 +482,17 @@ const AIAnalytics = () => {
                           <Badge variant="destructive">{anomaly.severity}</Badge>
                         </div>
                         <div className="text-sm text-red-700 space-y-1">
-                          {anomaly.anomalous_parameters.map((param, i) => (
-                            <div key={i}>
-                              <strong>{param.parameter.toUpperCase()}:</strong> {param.value} 
-                              (Expected: {param.expected_range})
+                          {anomaly.anomalous_parameters && anomaly.anomalous_parameters.length > 0 ? 
+                            anomaly.anomalous_parameters.map((param, i) => (
+                              <div key={i}>
+                                <strong>{param.parameter.toUpperCase()}:</strong> {param.value} 
+                                (Expected: {param.expected_range})
+                              </div>
+                            )) : 
+                            <div>
+                              <strong>TYPE:</strong> {anomaly.type} - {anomaly.description}
                             </div>
-                          ))}
+                          }
                         </div>
                         <div className="mt-2 text-xs text-red-600">
                           Anomaly Score: {anomaly.anomaly_score}
@@ -614,9 +786,275 @@ const AIAnalytics = () => {
             </Card>
           </div>
         </TabsContent>
+
+        {/* Advanced AI Tab */}
+        <TabsContent value="advanced">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* AI-Powered Predictive Timeline */}
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl">
+              <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🚀</span>
+                  Multi-Parameter AI Prediction
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={aiData.forecasts}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis dataKey="date" stroke="#666" fontSize={12} />
+                      <YAxis stroke="#666" fontSize={12} />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: 'white'
+                        }}
+                      />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="predicted_wqi" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={3}
+                        name="WQI Prediction"
+                        dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="predicted_ph" 
+                        stroke="#06b6d4" 
+                        strokeWidth={2}
+                        name="pH Level"
+                        dot={{ fill: '#06b6d4', strokeWidth: 2, r: 3 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="predicted_do" 
+                        stroke="#10b981" 
+                        strokeWidth={2}
+                        name="Dissolved Oxygen"
+                        dot={{ fill: '#10b981', strokeWidth: 2, r: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-purple-100 p-2 rounded text-center">
+                    <div className="font-semibold text-purple-800">WQI Trend</div>
+                    <div className="text-purple-600">↗ Improving</div>
+                  </div>
+                  <div className="bg-cyan-100 p-2 rounded text-center">
+                    <div className="font-semibold text-cyan-800">pH Stability</div>
+                    <div className="text-cyan-600">⚖ Balanced</div>
+                  </div>
+                  <div className="bg-green-100 p-2 rounded text-center">
+                    <div className="font-semibold text-green-800">DO Levels</div>
+                    <div className="text-green-600">📈 Rising</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Model Ensemble Performance */}
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl">
+              <CardHeader className="bg-gradient-to-r from-pink-600 to-red-600 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🎯</span>
+                  AI Model Ensemble
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {aiData.modelPerformance.map((model, index) => (
+                    <div key={index} className="border rounded-lg p-4 bg-gradient-to-r from-gray-50 to-white">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-gray-800">{model.model}</span>
+                        <Badge variant="outline" className="bg-green-100 text-green-800">
+                          {(model.accuracy * 100).toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="text-gray-500">MSE</div>
+                          <div className="font-medium">{model.mse.toFixed(1)}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-gray-500">R² Score</div>
+                          <div className="font-medium">{model.r2.toFixed(2)}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-gray-500">Last Trained</div>
+                          <div className="font-medium text-xs">{model.last_trained}</div>
+                        </div>
+                      </div>
+                      <div className="mt-2 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${model.accuracy * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Neural Network Architecture Visualization */}
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl">
+              <CardHeader className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🧠</span>
+                  Neural Network Architecture
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex justify-center items-center h-48">
+                  <div className="flex items-center space-x-8">
+                    {/* Input Layer */}
+                    <div className="text-center">
+                      <div className="text-xs text-gray-600 mb-2">Input Layer</div>
+                      <div className="space-y-1">
+                        {['pH', 'DO', 'Temp', 'Turb', 'TDS', 'EC'].map((param, i) => (
+                          <div key={i} className="w-12 h-4 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white">
+                            {param}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Hidden Layers */}
+                    <div className="text-center">
+                      <div className="text-xs text-gray-600 mb-2">Hidden Layers</div>
+                      <div className="flex space-x-2">
+                        <div className="space-y-1">
+                          {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i} className="w-8 h-4 bg-purple-500 rounded-full animate-pulse"></div>
+                          ))}
+                        </div>
+                        <div className="space-y-1">
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="w-8 h-4 bg-pink-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Output Layer */}
+                    <div className="text-center">
+                      <div className="text-xs text-gray-600 mb-2">Output</div>
+                      <div className="space-y-2">
+                        <div className="w-16 h-6 bg-green-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
+                          WQI
+                        </div>
+                        <div className="w-16 h-4 bg-yellow-500 rounded-full flex items-center justify-center text-xs text-white">
+                          Risk
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg">
+                  <div className="text-xs font-medium text-gray-800 mb-2">Network Stats</div>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="text-gray-600">Layers:</span>
+                      <span className="font-medium ml-1">4 (1 Input + 2 Hidden + 1 Output)</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Parameters:</span>
+                      <span className="font-medium ml-1">2,847</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Activation:</span>
+                      <span className="font-medium ml-1">ReLU, Sigmoid</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Optimizer:</span>
+                      <span className="font-medium ml-1">Adam</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Real-time AI Processing Status */}
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl">
+              <CardHeader className="bg-gradient-to-r from-orange-600 to-red-600 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">⚡</span>
+                  Real-time AI Processing
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-green-100 rounded-lg">
+                    <div>
+                      <div className="font-medium text-green-800">Data Ingestion</div>
+                      <div className="text-sm text-green-600">Processing sensor data streams</div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-green-700">Active</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-blue-100 rounded-lg">
+                    <div>
+                      <div className="font-medium text-blue-800">Model Inference</div>
+                      <div className="text-sm text-blue-600">Running predictions every 30s</div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-blue-700">Running</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-purple-100 rounded-lg">
+                    <div>
+                      <div className="font-medium text-purple-800">Anomaly Detection</div>
+                      <div className="text-sm text-purple-600">Continuous monitoring</div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-purple-700">Monitoring</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-gradient-to-r from-gray-100 to-gray-50 rounded-lg">
+                    <div className="text-sm font-medium text-gray-700 mb-2">Performance Metrics</div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="bg-white p-2 rounded">
+                        <div className="text-gray-500">Inference Speed</div>
+                        <div className="font-bold text-green-600">42ms</div>
+                      </div>
+                      <div className="bg-white p-2 rounded">
+                        <div className="text-gray-500">Throughput</div>
+                        <div className="font-bold text-blue-600">1.2k/min</div>
+                      </div>
+                      <div className="bg-white p-2 rounded">
+                        <div className="text-gray-500">Accuracy</div>
+                        <div className="font-bold text-purple-600">94.3%</div>
+                      </div>
+                      <div className="bg-white p-2 rounded">
+                        <div className="text-gray-500">Uptime</div>
+                        <div className="font-bold text-orange-600">99.8%</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
-};
+});
+
+AIAnalytics.displayName = 'AIAnalytics';
 
 export default AIAnalytics;

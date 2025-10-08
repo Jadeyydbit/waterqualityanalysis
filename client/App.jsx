@@ -26,6 +26,8 @@ import WQIClassifier from "./pages/WQIClassifier";
 import LinearRegression from "./pages/LinearRegression";
 import GISMapping from "./pages/GISMapping";
 import AIAnalytics from "./pages/AIAnalytics";
+import AdvancedFeatures from "./pages/AdvancedFeatures";
+import PerformanceMonitor from "./components/PerformanceMonitor";
 
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
@@ -36,7 +38,12 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
@@ -103,6 +110,15 @@ const App = () => (
             element={
               <DashboardLayout>
                 <AIAnalytics />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/dashboard/advanced-features"
+            element={
+              <DashboardLayout>
+                <AdvancedFeatures />
               </DashboardLayout>
             }
           />
@@ -204,9 +220,16 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      {/* Performance Monitor - only show in development and when performance is not critical */}
+      {import.meta.env.DEV && <PerformanceMonitor isVisible={true} />}
     </TooltipProvider>
   </QueryClientProvider>
 );
 
-
-createRoot(document.getElementById("root")).render(<App />);
+// Prevent multiple mounts in development
+const container = document.getElementById("root");
+if (!container._reactRootContainer) {
+  const root = createRoot(container);
+  container._reactRootContainer = root;
+  root.render(<App />);
+}
