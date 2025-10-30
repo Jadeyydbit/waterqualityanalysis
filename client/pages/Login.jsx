@@ -82,6 +82,26 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // First, check if it's a predefined admin account
+      const adminAccount = checkAdminCredentials(username, password);
+      
+      if (adminAccount) {
+        // Handle predefined admin login
+        localStorage.setItem('token', 'admin-token-' + Date.now());
+        localStorage.setItem('role', adminAccount.role);
+        localStorage.setItem('user', JSON.stringify({
+          id: adminAccount.username,
+          username: adminAccount.username,
+          email: adminAccount.email,
+          name: adminAccount.name,
+          role: adminAccount.role
+        }));
+        toast.success(`Welcome back, ${adminAccount.name}!`);
+        navigate('/dashboard');
+        return;
+      }
+
+      // If not admin, try regular user login via API
       const response = await fetch('/api/login/', {
         method: 'POST',
         headers: {
@@ -94,6 +114,7 @@ export default function Login() {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('role', 'user'); // Regular user role
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success("Welcome back! Successfully logged in.");
         navigate('/dashboard');

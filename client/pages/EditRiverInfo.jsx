@@ -59,8 +59,8 @@ export default function EditRiverInfo() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/dashboard/admin")}>
-              Back to Admin
+            <Button onClick={() => navigate("/dashboard")}>
+              Back to Dashboard
             </Button>
           </CardContent>
         </Card>
@@ -94,7 +94,7 @@ export default function EditRiverInfo() {
     };
 
     upsertRiver({ slug: existing.slug, info }, slug);
-    navigate("/dashboard/admin");
+    navigate("/dashboard");
   };
 
   return (

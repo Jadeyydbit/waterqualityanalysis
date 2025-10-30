@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// For icons, you would typically install `lucide-react` via npm/yarn
-// For this single-file setup, we'll use inline SVGs as placeholders
-// or use a CDN if available. For simplicity, I'll define SVG components here.
+
+// A simple RouterLink component to stand in for react-router-dom's Link
+const RouterLink = ({ to, children, className }) => (
+    <Link to={to} className={className}>
+        {children}
+    </Link>
+);
 
 // --- Icon Components (in a real project, these would be from a library) ---
-const Droplets = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.7-3.02C8.23 8.5 7 9.82 7 11.5c0 .96.78 1.75 1.75 1.75"/>
-    <path d="M10.41 9.92a2.2 2.2 0 0 0-1.44 3.2.5.5 0 0 1-.36.36c-1.3.56-2.61.03-3.2-1.12-1.24-2.4-1.03-5.3.5-7.4C7 3.82 8.7 3 10.5 3c2.7 0 5.2 2.7 5.5 5.5.3 2.4-1.1 4.5-3.1 5.5"/>
-  </svg>
+// This icon has been updated to the wave symbol you provided.
+const AppIcon = (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <path d="M 10 20 C 30 5, 70 35, 90 20" stroke="#42A5F5" strokeWidth="8" strokeLinecap="round"/>
+        <path d="M 10 40 C 30 25, 70 55, 90 40" stroke="#42A5F5" strokeWidth="8" strokeLinecap="round"/>
+        <path d="M 10 60 C 30 45, 70 75, 90 60" stroke="#42A5F5" strokeWidth="8" strokeLinecap="round"/>
+        <path d="M 10 80 C 30 65, 70 95, 90 80" stroke="#42A5F5" strokeWidth="8" strokeLinecap="round"/>
+    </svg>
 );
 const FlaskConical = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M10.2 21.7a1.7 1.7 0 0 1-1.2-1.2L4.5 9.5a1.7 1.7 0 0 1 1.2-2.3l10.3-3.6a1.7 1.7 0 0 1 2.3 1.2l4.5 10.8a1.7 1.7 0 0 1-1.2 2.3L8.5 21.8a1.7 1.7 0 0 1-1.2.1z"/><path d="m14 11-3 3"/><path d="M11 14l3-3"/></svg>
@@ -50,32 +57,6 @@ const Eye = (props) => (
 
 // --- App Structure ---
 
-function Header() {
-    return (
-        <header className="bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center space-x-3">
-                        <Droplets className="h-8 w-8 text-blue-600" />
-                        <div>
-                            <span className="text-xl font-bold text-gray-800">Mithi River Guardian</span>
-                            <p className="text-xs text-gray-500">River Health Monitoring</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-                            Sign In
-                        </Link>
-                        <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
-                            Get Started
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </header>
-    );
-}
-
 function Hero() {
     return (
         <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-28 bg-gray-50 overflow-hidden">
@@ -83,67 +64,72 @@ function Hero() {
             <div className="absolute bottom-0 left-0 -ml-32 mb-20 w-80 h-80 bg-blue-200/30 rounded-full filter blur-3xl opacity-50"></div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    <div className="text-center lg:text-left">
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight">
-                            Monitor Water Quality with <span className="text-blue-600">AI Precision</span>
+                <div className="text-center">
+                    <div className="flex justify-center items-center gap-1 mb-4">
+                        <span className="text-4xl md:text-5xl">🌊</span>
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight">
+                            Mithi River Guardian
                         </h1>
-                        <p className="mt-6 text-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
-                            Advanced water quality monitoring and analysis platform powered by machine learning. Get real-time insights, predictive analytics, and comprehensive reports for water safety.
-                        </p>
-                        <div className="mt-8 flex justify-center lg:justify-start space-x-4">
-                            <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 transition">
-                                Start Monitoring <ChevronRight className="w-5 h-5 ml-2" />
-                            </Link>
-                            <Link to="/demo" className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-600 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 transition">
-                                View Demo
-                            </Link>
-                        </div>
                     </div>
-                    
-                    <div className="relative">
-                        <div className="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200/50">
-                           <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-lg font-semibold text-gray-800">Water Quality Index</h3>
-                                <div className="flex items-center space-x-2">
-                                    <span className="relative flex h-3 w-3">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                                    </span>
-                                    <span className="text-sm font-medium text-green-600">Live</span>
+                    <p className="mt-4 text-xl font-medium text-gray-700">
+                        Monitor Water Quality
+                    </p>
+                    <p className="mt-2 text-base text-gray-600 max-w-xl mx-auto">
+                        Advanced water quality monitoring and analysis platform powered by machine learning. Get real-time insights, predictive analytics, and comprehensive reports for water safety.
+                    </p>
+                    <div className="mt-8 flex justify-center space-x-4">
+                        <RouterLink to="/register" className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 transition">
+                            Start Monitoring <ChevronRight className="w-5 h-5 ml-2" />
+                        </RouterLink>
+                        <RouterLink to="/demo" className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-blue-600 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 transition">
+                            View Demo
+                        </RouterLink>
+                    </div>
+                </div>
+                
+                {/* Water Quality Index Dashboard - Below main content */}
+                <div className="mt-16 max-w-4xl mx-auto">
+                    <div className="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200/50">
+                       <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800">Water Quality Index</h3>
+                            <div className="flex items-center space-x-2">
+                                <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                                <span className="text-sm font-medium text-green-600">Live</span>
+                            </div>
+                       </div>
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                            <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <FlaskConical className="w-4 h-4 mr-2 text-blue-500"/>
+                                    <span>pH Level</span>
                                 </div>
-                           </div>
-                           <div className="grid grid-cols-2 gap-4 mt-6">
-                                <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <FlaskConical className="w-4 h-4 mr-2 text-blue-500"/>
-                                        <span>pH Level</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-800 mt-1">7.2</p>
+                                <p className="text-2xl font-bold text-gray-800 mt-1">7.2</p>
+                            </div>
+                            <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <TrendingUp className="w-4 h-4 mr-2 text-green-500"/>
+                                    <span>Quality</span>
                                 </div>
-                                <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <TrendingUp className="w-4 h-4 mr-2 text-green-500"/>
-                                        <span>Quality</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-800 mt-1">85%</p>
+                                <p className="text-2xl font-bold text-gray-800 mt-1">85%</p>
+                            </div>
+                            <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <Waves className="w-4 h-4 mr-2 text-teal-500"/>
+                                    <span>Turbidity</span>
                                 </div>
-                                <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Waves className="w-4 h-4 mr-2 text-teal-500"/>
-                                        <span>Turbidity</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-800 mt-1">0.8 <span className="text-base font-normal text-gray-500">NTU</span></p>
+                                <p className="text-2xl font-bold text-gray-800 mt-1">0.8 <span className="text-base font-normal text-gray-500">NTU</span></p>
+                            </div>
+                            <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <Eye className="w-4 h-4 mr-2 text-sky-500"/>
+                                    <span>Dissolved O₂</span>
                                 </div>
-                                <div className="bg-gray-100/60 p-4 rounded-xl border border-gray-200/50">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Eye className="w-4 h-4 mr-2 text-sky-500"/>
-                                        <span>Dissolved O₂</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-800 mt-1">8.2 <span className="text-base font-normal text-gray-500">mg/L</span></p>
-                                </div>
-                           </div>
-                        </div>
+                                <p className="text-2xl font-bold text-gray-800 mt-1">8.2 <span className="text-base font-normal text-gray-500">mg/L</span></p>
+                            </div>
+                       </div>
                     </div>
                 </div>
             </div>
@@ -225,6 +211,11 @@ function Footer() {
         <footer className="bg-gray-100">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
                 <p>&copy; {new Date().getFullYear()} Mithi River Guardian. All rights reserved.</p>
+                <p className="text-xs mt-2">
+                    <a href="https://www.flaticon.com/free-icons/clean" title="clean icons" className="hover:text-blue-600">
+                        Clean icons created by Freepik - Flaticon
+                    </a>
+                </p>
             </div>
         </footer>
     );
@@ -233,7 +224,16 @@ function Footer() {
 export default function Home() {
   return (
     <div className="bg-white">
-      <Header />
+        <div className="fixed top-0 right-0 p-6 z-50">
+            <div className="flex items-center space-x-4">
+                <RouterLink to="/login" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+                    Sign In
+                </RouterLink>
+                <RouterLink to="/register" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
+                    Get Started
+                </RouterLink>
+            </div>
+        </div>
       <main>
         <Hero />
         <Features />

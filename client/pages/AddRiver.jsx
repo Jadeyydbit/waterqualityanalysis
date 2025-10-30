@@ -99,7 +99,7 @@ export default function AddRiver() {
     };
 
     addRiver(river);
-    navigate("/dashboard/admin");
+    navigate("/dashboard");
   };
 
   return (

@@ -78,12 +78,15 @@ def send_welcome_email(recipient, username="User"):
         message = MIMEMultipart()
         message["From"] = sender_email
         message["To"] = recipient
-        message["Subject"] = "Welcome to AquaMonitor - Water Quality Analysis Platform!"
+        message["Subject"] = "Welcome to Mithi River Guardian - Water Quality Analysis Platform!"
         
         body = f"""
 Dear {username},
 
 Welcome to Mithi River Guardian! 🌊
+Your Account Details:
+• Username: {username}
+• Email: {recipient}
 
 Thank you for joining our water quality monitoring platform. You now have access to:
 
@@ -98,6 +101,10 @@ Getting Started:
 2. Explore the water quality metrics
 3. Set up monitoring alerts
 4. Access ML prediction tools
+
+Your login credentials are secure and you can start exploring the platform immediately.
+
+Visit our platform: http://localhost:3000
 
 If you have any questions, feel free to contact our support team.
 
@@ -128,6 +135,8 @@ This is an automated message from Mithi River Guardian Water Quality Analysis Pl
         return False
 
 # Signup OTP endpoint (can send to any email/phone)
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 @api_view(['POST'])
 def send_signup_otp(request):
     email = request.data.get('email')
@@ -302,7 +311,14 @@ def signup(request):
         password=hashlib.sha256(password.encode()).hexdigest()
     )
     user.save()
-    
+
+    # Send welcome email after successful signup
+    try:
+        first_name = name.split()[0] if name else email
+        send_welcome_email(email, first_name)
+    except Exception as e:
+        print(f"Welcome email sending failed: {e}")
+
     return Response({'success': True, 'email': user.email})
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth.models import User

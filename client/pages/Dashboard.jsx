@@ -6,7 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Activity, Droplets } from "lucide-react";
 import { sampleData, debounce } from "@/lib/performance";
 
-const Dashboard = React.memo(({ demoMode = false }) => {
+const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [waterDrops, setWaterDrops] = useState([]);
 

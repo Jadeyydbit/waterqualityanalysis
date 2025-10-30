@@ -1,4 +1,5 @@
-﻿import React, { useState } from "react";
+﻿
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,12 @@ import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -39,42 +46,32 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch('/api/register/', {
+      const response = await fetch('/api/send-signup-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          first_name: formData.firstName,
-          last_name: formData.lastName
+          confirmPassword: formData.confirmPassword
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        toast.success("Registration successful! Welcome email sent to your inbox.");
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        toast.success("OTP sent to your email. Please check your inbox and enter the code below.");
+        navigate('/otp-verification', { state: { email: formData.email, formData } });
       } else {
         toast.error(data.message || data.error || "Registration failed. Please try again.");
       }
     } catch (error) {
-      toast.error("Connection error. Please check your network and try again.");
+      toast.error("Connection error. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
   };
 
   return (
