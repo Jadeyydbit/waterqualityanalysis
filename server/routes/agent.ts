@@ -1,42 +1,85 @@
 import type { RequestHandler } from "express";
+import Anthropic from "@anthropic-ai/sdk";
 
-// Simple streaming endpoint that simulates fast incremental responses.
-// Replace this with a real LLM provider stream if needed.
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || "",
+});
+
+// Real Claude Sonnet 4 streaming endpoint
 export const handleAgentStream: RequestHandler = async (req, res) => {
-  // Ensure chunked response
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("X-Accel-Buffering", "no"); // for some proxies
+  res.setHeader("X-Accel-Buffering", "no");
 
   const prompt: string = (req.body && req.body.prompt) || "";
-  const base = prompt?.slice(0, 200) || "Query";
-  const message = `Analyzing: ${base}.\n` +
-    "Key insights: water quality parameters assessed.\n" +
-    "Actionable guidance follows:\n" +
-    "1) Maintain pH within safe range.\n2) Monitor DO and temperature.\n3) Investigate abnormal spikes.\n" +
-    "Summary: Provide targeted remediation where thresholds exceed limits.";
+  
+  if (!prompt) {
+    res.status(400).end("No prompt provided");
+    return;
+  }
 
-  const chunks = message.split(/(\s+)/).filter(Boolean);
+  try {
+    const stream = await anthropic.messages.stream({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1500,
+      temperature: 0.1,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
 
-  let i = 0;
-  const interval = setInterval(() => {
-    if (i >= chunks.length) {
-      clearInterval(interval);
-      res.end();
-      return;
+    // Stream chunks to client
+    for await (const chunk of stream) {
+      if (
+        chunk.type === "content_block_delta" &&
+        chunk.delta.type === "text_delta"
+      ) {
+        res.write(chunk.delta.text);
+      }
     }
-    res.write(chunks[i]);
-    i += 1;
-  }, 25); // small delay for perceived streaming
+
+    res.end();
+  } catch (error) {
+    console.error("Claude streaming error:", error);
+    res.status(500).end("Stream error");
+  }
 };
 
 export const handleAgent: RequestHandler = async (req, res) => {
   const prompt: string = (req.body && req.body.prompt) || "";
-  // Non-streaming fallback/utility endpoint
-  res.json({
-    ok: true,
-    prompt,
-    answer:
-      "Quick analysis complete. Keep pH 6.5–8.5, DO > 5 mg/L, and track temperature trends.",
-  });
+  
+  if (!prompt) {
+    res.status(400).json({ ok: false, error: "No prompt provided" });
+    return;
+  }
+
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1500,
+      temperature: 0.1,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    const textContent = message.content.find((block) => block.type === "text");
+    const answer = textContent && textContent.type === "text" ? textContent.text : "";
+
+    res.json({
+      ok: true,
+      prompt,
+      answer,
+    });
+  } catch (error) {
+    console.error("Claude API error:", error);
+    res.status(500).json({ ok: false, error: "API error" });
+  }
 };
+
