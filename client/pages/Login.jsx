@@ -82,6 +82,7 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // First try API authentication
       const response = await fetch('/api/login/', {
         method: 'POST',
         headers: {
@@ -95,13 +96,32 @@ export default function Login() {
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        toast.success("Welcome back! Successfully logged in.");
+        toast.success("Welcome back! Successfully logged in via API.");
         navigate('/dashboard');
+        return;
       } else {
         toast.error(data.message || "Invalid credentials. Please try again.");
+        return;
       }
     } catch (error) {
-      toast.error("Connection error. Please check your network and try again.");
+      // Fallback to local admin check when API is not available
+      console.log("API not available, using local authentication fallback");
+      
+      const adminUser = checkAdminCredentials(username, password);
+      
+      if (adminUser) {
+        // Create a mock token and store user info
+        const mockToken = `offline_token_${adminUser.username}_${Date.now()}`;
+        const userInfo = { ...adminUser };
+        delete userInfo.password; // Remove password from stored info
+        
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(userInfo));
+        toast.success(`Welcome back, ${adminUser.name}! (Offline mode)`);
+        navigate('/dashboard');
+      } else {
+        toast.error("Invalid credentials. Please check your username and password.");
+      }
     } finally {
       setLoading(false);
     }

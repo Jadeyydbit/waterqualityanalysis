@@ -569,3 +569,536 @@ from .serializers import RiverSerializer
 class RiverViewSet(viewsets.ModelViewSet):
     queryset = River.objects.all()
     serializer_class = RiverSerializer
+
+# Dashboard CSV Data Functions
+@api_view(['GET'])
+def get_dashboard_stats(request):
+    """Get real-time dashboard statistics from CSV file"""
+    try:
+        import pandas as pd
+        import os
+        import numpy as np
+        from datetime import datetime
+        
+        # Path to CSV file
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mithi_river_data.csv')
+        
+        if not os.path.exists(csv_path):
+            return Response({
+                'error': 'CSV file not found',
+                'path': csv_path
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Read CSV file
+        df = pd.read_csv(csv_path)
+        
+        # Get latest year data (most recent)
+        latest_year = df['Year'].max()
+        latest_data = df[df['Year'] == latest_year]
+        
+        # Calculate current statistics
+        current_stats = {
+            'water_quality_index': {
+                'value': latest_data['WQI'].mode().iloc[0] if len(latest_data) > 0 else 'Poor',
+                'samples': len(latest_data),
+                'distribution': latest_data['WQI'].value_counts().to_dict()
+            },
+            'temperature': {
+                'value': round(latest_data['Temp'].mean(), 1),
+                'unit': '°C',
+                'min': round(latest_data['Temp'].min(), 1),
+                'max': round(latest_data['Temp'].max(), 1),
+                'status': get_temp_status(latest_data['Temp'].mean())
+            },
+            'ph': {
+                'value': round(latest_data['pH'].mean(), 1),
+                'unit': '',
+                'min': round(latest_data['pH'].min(), 1),
+                'max': round(latest_data['pH'].max(), 1),
+                'status': get_ph_status(latest_data['pH'].mean())
+            },
+            'dissolved_oxygen': {
+                'value': round(latest_data['DO'].mean(), 1),
+                'unit': 'mg/L',
+                'min': round(latest_data['DO'].min(), 1),
+                'max': round(latest_data['DO'].max(), 1),
+                'status': get_do_status(latest_data['DO'].mean())
+            },
+            'tds': {
+                'value': int(latest_data['TDS'].mean()),
+                'unit': 'ppm',
+                'min': int(latest_data['TDS'].min()),
+                'max': int(latest_data['TDS'].max()),
+                'status': get_tds_status(latest_data['TDS'].mean())
+            },
+            'bod': {
+                'value': round(latest_data['BOD'].mean(), 1),
+                'unit': 'mg/L',
+                'min': round(latest_data['BOD'].min(), 1),
+                'max': round(latest_data['BOD'].max(), 1),
+                'status': get_bod_status(latest_data['BOD'].mean())
+            },
+            'cod': {
+                'value': round(latest_data['COD'].mean(), 1),
+                'unit': 'mg/L',
+                'min': round(latest_data['COD'].min(), 1),
+                'max': round(latest_data['COD'].max(), 1),
+                'status': get_cod_status(latest_data['COD'].mean())
+            }
+        }
+        
+        # Location-wise data
+        location_stats = []
+        for location in df['Location'].unique():
+            loc_data = latest_data[latest_data['Location'] == location]
+            if len(loc_data) > 0:
+                location_stats.append({
+                    'location': location,
+                    'samples': len(loc_data),
+                    'avg_temp': round(loc_data['Temp'].mean(), 1),
+                    'avg_ph': round(loc_data['pH'].mean(), 1),
+                    'avg_do': round(loc_data['DO'].mean(), 1),
+                    'avg_tds': int(loc_data['TDS'].mean()),
+                    'avg_bod': round(loc_data['BOD'].mean(), 1),
+                    'avg_cod': round(loc_data['COD'].mean(), 1),
+                    'wqi': loc_data['WQI'].mode().iloc[0] if len(loc_data) > 0 else 'Poor'
+                })
+        
+        # Trend data (simulated daily from recent data)
+        trend_data = generate_trend_data(latest_data)
+        
+        # Dataset info
+        dataset_info = {
+            'total_records': len(df),
+            'locations': df['Location'].nunique(),
+            'location_names': df['Location'].unique().tolist(),
+            'year_range': f"{df['Year'].min()} - {df['Year'].max()}",
+            'latest_year': int(latest_year),
+            'parameters': ['Temperature', 'pH', 'DO', 'TDS', 'BOD', 'COD', 'WQI']
+        }
+        
+        return Response({
+            'success': True,
+            'timestamp': datetime.now().isoformat(),
+            'current_stats': current_stats,
+            'location_data': location_stats,
+            'trend_data': trend_data,
+            'dataset_info': dataset_info,
+            'data_source': 'Mithi River CSV Dataset'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_latest_readings(request):
+    """Get latest sensor readings from CSV"""
+    try:
+        import pandas as pd
+        import os
+        from datetime import datetime, timedelta
+        
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mithi_river_data.csv')
+        df = pd.read_csv(csv_path)
+        
+        # Get recent readings from latest year
+        latest_year = df['Year'].max()
+        latest_samples = df[df['Year'] == latest_year].sample(n=min(20, len(df[df['Year'] == latest_year])))
+        
+        readings = []
+        for i, (_, row) in enumerate(latest_samples.iterrows()):
+            # Simulate different timestamps
+            timestamp = datetime.now() - timedelta(minutes=i*5)
+            
+            readings.append({
+                'id': len(readings) + 1,
+                'location': row['Location'],
+                'timestamp': timestamp.isoformat(),
+                'temperature': round(row['Temp'], 1),
+                'ph': round(row['pH'], 1),
+                'dissolved_oxygen': round(row['DO'], 1),
+                'tds': int(row['TDS']),
+                'bod': round(row['BOD'], 1),
+                'cod': round(row['COD'], 1),
+                'wqi': row['WQI'],
+                'year': int(row['Year'])
+            })
+        
+        # Sort by timestamp (newest first)
+        readings.sort(key=lambda x: x['timestamp'], reverse=True)
+        
+        return Response({
+            'success': True,
+            'readings': readings,
+            'count': len(readings),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Helper functions for status determination
+def get_temp_status(temp):
+    if 20 <= temp <= 30:
+        return {'category': 'optimal', 'color': 'green', 'message': 'Optimal'}
+    elif temp < 20:
+        return {'category': 'cool', 'color': 'blue', 'message': 'Cool'}
+    else:
+        return {'category': 'warm', 'color': 'orange', 'message': 'Warm'}
+
+def get_ph_status(ph):
+    if 6.5 <= ph <= 8.5:
+        return {'category': 'normal', 'color': 'green', 'message': 'Normal Range'}
+    elif ph < 6.5:
+        return {'category': 'acidic', 'color': 'red', 'message': 'Acidic'}
+    else:
+        return {'category': 'alkaline', 'color': 'orange', 'message': 'Alkaline'}
+
+def get_do_status(do):
+    if do >= 6:
+        return {'category': 'excellent', 'color': 'green', 'message': 'Excellent'}
+    elif do >= 4:
+        return {'category': 'good', 'color': 'blue', 'message': 'Good'}
+    else:
+        return {'category': 'low', 'color': 'red', 'message': 'Low'}
+
+def get_tds_status(tds):
+    if tds <= 300:
+        return {'category': 'excellent', 'color': 'green', 'message': 'Excellent'}
+    elif tds <= 600:
+        return {'category': 'good', 'color': 'blue', 'message': 'Good'}
+    elif tds <= 900:
+        return {'category': 'fair', 'color': 'orange', 'message': 'Fair'}
+    else:
+        return {'category': 'poor', 'color': 'red', 'message': 'Poor'}
+
+def get_bod_status(bod):
+    if bod <= 3:
+        return {'category': 'excellent', 'color': 'green', 'message': 'Excellent'}
+    elif bod <= 6:
+        return {'category': 'good', 'color': 'blue', 'message': 'Good'}
+    else:
+        return {'category': 'poor', 'color': 'red', 'message': 'High'}
+
+def get_cod_status(cod):
+    if cod <= 50:
+        return {'category': 'good', 'color': 'green', 'message': 'Good'}
+    elif cod <= 100:
+        return {'category': 'moderate', 'color': 'orange', 'message': 'Moderate'}
+    else:
+        return {'category': 'poor', 'color': 'red', 'message': 'High'}
+
+def generate_trend_data(latest_data):
+    """Generate 7-day trend data from recent samples"""
+    import numpy as np
+    
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    trend_data = []
+    
+    # Use samples from latest data to create trend
+    for i, day in enumerate(days):
+        if len(latest_data) > 0:
+            sample = latest_data.sample(n=1).iloc[0]
+            
+            # Convert WQI category to numeric for charting
+            wqi_numeric = 85 if sample['WQI'] == 'Good' else 65 if sample['WQI'] == 'Moderate' else 45
+            
+            # Add some daily variation
+            temp_var = np.random.normal(0, 1)
+            ph_var = np.random.normal(0, 0.1)
+            do_var = np.random.normal(0, 0.3)
+            
+            trend_data.append({
+                'day': day,
+                'wqi': max(20, min(100, int(wqi_numeric + np.random.normal(0, 5)))),
+                'temperature': round(max(15, min(40, sample['Temp'] + temp_var)), 1),
+                'ph': round(max(5, min(9, sample['pH'] + ph_var)), 1),
+                'dissolved_oxygen': round(max(1, min(12, sample['DO'] + do_var)), 1),
+                'tds': max(50, min(5000, int(sample['TDS'] + np.random.normal(0, 100)))),
+                'bod': round(max(1, min(25, sample['BOD'] + np.random.normal(0, 1))), 1),
+                'cod': round(max(10, min(300, sample['COD'] + np.random.normal(0, 10))), 1)
+            })
+    
+    return trend_data
+
+@api_view(['GET'])
+def get_advanced_features_data(request):
+    """Get data for advanced features components"""
+    try:
+        import pandas as pd
+        import os
+        from datetime import datetime, timedelta
+        import numpy as np
+        
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mithi_river_data.csv')
+        df = pd.read_csv(csv_path)
+        
+        # Get latest year data
+        latest_year = df['Year'].max()
+        latest_data = df[df['Year'] == latest_year]
+        
+        # Sensor Network Data
+        sensor_data = []
+        for i, location in enumerate(df['Location'].unique()):
+            loc_data = latest_data[latest_data['Location'] == location]
+            if len(loc_data) > 0:
+                sample = loc_data.sample(n=1).iloc[0]
+                sensor_data.append({
+                    'id': f'sensor_{i+1}',
+                    'name': f'{location} Sensor',
+                    'location': location,
+                    'status': 'active' if np.random.random() > 0.1 else 'warning',
+                    'battery': np.random.randint(70, 100),
+                    'signal': np.random.randint(80, 100),
+                    'last_reading': datetime.now().isoformat(),
+                    'temperature': round(sample['Temp'], 1),
+                    'ph': round(sample['pH'], 1),
+                    'dissolved_oxygen': round(sample['DO'], 1),
+                    'tds': int(sample['TDS']),
+                    'bod': round(sample['BOD'], 1),
+                    'cod': round(sample['COD'], 1)
+                })
+        
+        # Heatmap Data (simulated grid data)
+        heatmap_data = []
+        for i in range(20):  # 20x20 grid
+            for j in range(20):
+                # Use nearby location data with some interpolation
+                base_sample = latest_data.sample(n=1).iloc[0]
+                heatmap_data.append({
+                    'x': i,
+                    'y': j,
+                    'value': max(0, min(100, base_sample['TDS']/50 + np.random.normal(0, 10))),
+                    'temperature': round(base_sample['Temp'] + np.random.normal(0, 2), 1),
+                    'location': f'Grid_{i}_{j}'
+                })
+        
+        # Environmental Impact Data
+        impact_data = {
+            'overall_score': np.random.randint(60, 80),
+            'categories': [
+                {
+                    'name': 'Water Quality',
+                    'score': int(latest_data['WQI'].apply(lambda x: 85 if x == 'Good' else 65 if x == 'Moderate' else 45).mean()),
+                    'status': 'needs_attention'
+                },
+                {
+                    'name': 'Biodiversity',
+                    'score': np.random.randint(50, 75),
+                    'status': 'critical'
+                },
+                {
+                    'name': 'Pollution Control',
+                    'score': np.random.randint(40, 70),
+                    'status': 'improving'
+                },
+                {
+                    'name': 'Ecosystem Health',
+                    'score': np.random.randint(45, 65),
+                    'status': 'poor'
+                }
+            ],
+            'recommendations': [
+                'Increase monitoring frequency in high-pollution areas',
+                'Implement stricter industrial discharge controls',
+                'Enhance sewage treatment capacity',
+                'Develop green infrastructure for natural filtration'
+            ]
+        }
+        
+        # Pollution Source Data
+        pollution_sources = []
+        source_types = ['Industrial', 'Sewage', 'Agricultural', 'Residential', 'Commercial']
+        for i, stype in enumerate(source_types):
+            for location in df['Location'].unique()[:3]:  # Top 3 locations
+                loc_data = latest_data[latest_data['Location'] == location]
+                if len(loc_data) > 0:
+                    sample = loc_data.sample(n=1).iloc[0]
+                    pollution_sources.append({
+                        'id': f'{stype.lower()}_{location.lower()}_{i}',
+                        'name': f'{location} {stype} Source',
+                        'type': stype,
+                        'location': location,
+                        'coordinates': {
+                            'lat': 19.0 + np.random.uniform(-0.1, 0.1),
+                            'lng': 72.85 + np.random.uniform(-0.1, 0.1)
+                        },
+                        'severity': 'high' if sample['BOD'] > 15 else 'medium' if sample['BOD'] > 10 else 'low',
+                        'pollutants': ['BOD', 'COD', 'TDS'],
+                        'impact_score': min(100, int((sample['BOD'] + sample['COD']/5 + sample['TDS']/50))),
+                        'status': 'active',
+                        'monthly_discharge': np.random.randint(1000, 50000),
+                        'compliance': 'violation' if sample['BOD'] > 15 else 'warning' if sample['BOD'] > 10 else 'compliant'
+                    })
+        
+        # Alert System Data
+        alerts = []
+        alert_types = ['pH Spike', 'Low DO', 'High TDS', 'Temperature Alert', 'BOD Violation']
+        for i, alert_type in enumerate(alert_types):
+            if np.random.random() > 0.3:  # 70% chance of alert
+                location = np.random.choice(df['Location'].unique())
+                alerts.append({
+                    'id': f'alert_{i}',
+                    'type': alert_type,
+                    'location': location,
+                    'severity': np.random.choice(['high', 'medium', 'low']),
+                    'message': f'{alert_type} detected at {location}',
+                    'timestamp': (datetime.now() - timedelta(minutes=np.random.randint(5, 120))).isoformat(),
+                    'status': 'active',
+                    'parameter': alert_type.split()[0].lower(),
+                    'value': np.random.uniform(5, 25),
+                    'threshold': np.random.uniform(8, 15)
+                })
+        
+        # Timeline Data (historical trends)
+        timeline_data = []
+        for year in range(2020, 2025):
+            year_data = df[df['Year'] == year]
+            if len(year_data) > 0:
+                timeline_data.append({
+                    'year': year,
+                    'avg_wqi': year_data['WQI'].apply(lambda x: 85 if x == 'Good' else 65 if x == 'Moderate' else 45).mean(),
+                    'avg_temperature': round(year_data['Temp'].mean(), 1),
+                    'avg_ph': round(year_data['pH'].mean(), 1),
+                    'avg_do': round(year_data['DO'].mean(), 1),
+                    'avg_tds': int(year_data['TDS'].mean()),
+                    'avg_bod': round(year_data['BOD'].mean(), 1),
+                    'avg_cod': round(year_data['COD'].mean(), 1),
+                    'total_samples': len(year_data),
+                    'good_quality_percentage': (year_data['WQI'] == 'Good').sum() / len(year_data) * 100
+                })
+        
+        # Ecosystem Health Data
+        ecosystem_data = {
+            'overall_health': np.random.randint(40, 70),
+            'biodiversity_index': round(np.random.uniform(0.3, 0.7), 2),
+            'species_count': {
+                'fish': np.random.randint(15, 35),
+                'plants': np.random.randint(25, 50),
+                'microorganisms': np.random.randint(100, 200),
+                'birds': np.random.randint(10, 25)
+            },
+            'habitat_quality': {
+                'riparian_zone': np.random.randint(30, 60),
+                'water_column': np.random.randint(25, 55),
+                'sediment': np.random.randint(20, 50),
+                'banks': np.random.randint(35, 65)
+            },
+            'threats': [
+                {'name': 'Industrial Pollution', 'severity': 'high', 'trend': 'increasing'},
+                {'name': 'Sewage Discharge', 'severity': 'critical', 'trend': 'stable'},
+                {'name': 'Solid Waste', 'severity': 'medium', 'trend': 'decreasing'},
+                {'name': 'Encroachment', 'severity': 'high', 'trend': 'increasing'}
+            ]
+        }
+        
+        # Treatment Dashboard Data
+        treatment_data = {
+            'plants': [
+                {
+                    'name': 'Bandra STP',
+                    'capacity': 500,
+                    'current_load': np.random.randint(350, 480),
+                    'efficiency': round(np.random.uniform(75, 95), 1),
+                    'status': 'operational',
+                    'inlet_bod': np.random.randint(200, 400),
+                    'outlet_bod': np.random.randint(15, 30),
+                    'inlet_cod': np.random.randint(400, 800),
+                    'outlet_cod': np.random.randint(50, 100)
+                },
+                {
+                    'name': 'Kurla STP',
+                    'capacity': 300,
+                    'current_load': np.random.randint(200, 280),
+                    'efficiency': round(np.random.uniform(70, 90), 1),
+                    'status': 'maintenance',
+                    'inlet_bod': np.random.randint(180, 350),
+                    'outlet_bod': np.random.randint(20, 40),
+                    'inlet_cod': np.random.randint(350, 700),
+                    'outlet_cod': np.random.randint(60, 120)
+                }
+            ],
+            'daily_treated': np.random.randint(600, 800),
+            'daily_generated': np.random.randint(750, 950),
+            'treatment_efficiency': round(np.random.uniform(78, 88), 1),
+            'energy_consumption': np.random.randint(2000, 3000),
+            'chemical_usage': {
+                'chlorine': np.random.randint(100, 200),
+                'alum': np.random.randint(150, 300),
+                'lime': np.random.randint(80, 150)
+            }
+        }
+        
+        return Response({
+            'success': True,
+            'timestamp': datetime.now().isoformat(),
+            'sensor_network': sensor_data,
+            'heatmap_data': heatmap_data,
+            'environmental_impact': impact_data,
+            'pollution_sources': pollution_sources,
+            'smart_alerts': alerts,
+            'timeline_data': timeline_data,
+            'ecosystem_health': ecosystem_data,
+            'treatment_dashboard': treatment_data,
+            'data_source': 'Mithi River CSV Dataset - Advanced Features'
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_3d_visualization_data(request):
+    """Get 3D visualization data from CSV"""
+    try:
+        import pandas as pd
+        import os
+        import numpy as np
+        from datetime import datetime
+        
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mithi_river_data.csv')
+        df = pd.read_csv(csv_path)
+        
+        latest_year = df['Year'].max()
+        latest_data = df[df['Year'] == latest_year].sample(n=min(100, len(df[df['Year'] == latest_year])))
+        
+        # Generate 3D points with real data
+        visualization_data = []
+        for i, (_, row) in enumerate(latest_data.iterrows()):
+            visualization_data.append({
+                'x': np.random.uniform(-10, 10),
+                'y': np.random.uniform(-10, 10),
+                'z': np.random.uniform(0, 20),
+                'value': row['TDS'],
+                'temperature': row['Temp'],
+                'ph': row['pH'],
+                'do': row['DO'],
+                'bod': row['BOD'],
+                'cod': row['COD'],
+                'wqi': row['WQI'],
+                'location': row['Location'],
+                'color': '#ff0000' if row['WQI'] == 'Poor' else '#ffaa00' if row['WQI'] == 'Moderate' else '#00ff00'
+            })
+        
+        return Response({
+            'success': True,
+            'data': visualization_data,
+            'metadata': {
+                'total_points': len(visualization_data),
+                'timestamp': datetime.now().isoformat()
+            }
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

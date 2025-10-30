@@ -13,51 +13,90 @@ const AIAnalytics = React.memo(() => {
   const [modelStatus, setModelStatus] = useState(null);
 
   useEffect(() => {
-    // Generate mock AI data instead of API calls
+    // Fetch real CSV-derived data for graphs, keep model status/mock reports as-is
     generateMockAIData();
     generateMockModelStatus();
   }, []);
 
-  const generateMockAIData = useCallback(() => {
+  const generateMockAIData = useCallback(async () => {
+    // This function now sources graph data from backend CSV endpoints and maps them into the
+    // shapes that the charts expect. Non-graph pieces remain generated locally where needed.
     try {
       setLoading(true);
-      
-      // Generate forecast data
+
+      // Parallel fetch: dashboard stats (trend_data) and advanced features (timeline_data)
+      const [statsRes, advRes] = await Promise.all([
+        fetch('/api/dashboard/stats/'),
+        fetch('/api/advanced-features/')
+      ]);
+
+      const statsJson = statsRes.ok ? await statsRes.json() : null;
+      const advJson = advRes.ok ? await advRes.json() : null;
+
+      // Build forecasts using the weekly trend (7 points) as the strongest data source for graphs
       const forecasts = [];
-      for (let i = 0; i < 30; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        
-        // AI prediction with confidence intervals
-        const baseWQI = 75 + Math.sin(i * 0.2) * 15 + Math.random() * 10;
-        const confidence = 0.85 + Math.random() * 0.1;
-        
-        forecasts.push({
-          date: date.toISOString().split('T')[0],
-          predicted_wqi: Math.max(20, Math.min(100, baseWQI)),
-          confidence: confidence,
-          upper_bound: Math.min(100, baseWQI + 10),
-          lower_bound: Math.max(0, baseWQI - 10),
-          predicted_ph: 7.0 + Math.sin(i * 0.15) * 0.5 + (Math.random() - 0.5) * 0.2,
-          predicted_do: 6.5 + Math.cos(i * 0.1) * 1.5 + (Math.random() - 0.5) * 0.5,
-          predicted_temp: 28 + Math.sin(i * 0.05) * 3 + (Math.random() - 0.5) * 1,
-          predicted_bod: 15 + Math.sin(i * 0.08) * 8 + Math.random() * 5,
-          predicted_cod: 35 + Math.cos(i * 0.12) * 15 + Math.random() * 8,
-          predicted_tds: 280 + Math.sin(i * 0.06) * 40 + Math.random() * 20,
-          anomaly_score: Math.random() * 0.3,
-          risk_level: Math.random() > 0.8 ? 'high' : Math.random() > 0.5 ? 'medium' : 'low'
-        });
+      if (statsJson && statsJson.success && Array.isArray(statsJson.trend_data) && statsJson.trend_data.length > 0) {
+        const baseTrend = statsJson.trend_data;
+        const today = new Date();
+        // create 14-day forecast by repeating/perturbing weekly trend
+        for (let i = 0; i < 14; i++) {
+          const sample = baseTrend[i % baseTrend.length];
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          const wqi = sample.wqi || 60 + Math.round(Math.random() * 20);
+
+          forecasts.push({
+            date: date.toISOString().split('T')[0],
+            predicted_wqi: wqi,
+            confidence: 0.75 + Math.random() * 0.2,
+            upper_bound: Math.min(100, wqi + Math.round(Math.random() * 6)),
+            lower_bound: Math.max(0, wqi - Math.round(Math.random() * 6)),
+            predicted_ph: sample.ph || 7.0,
+            predicted_do: sample.do || 5.5,
+            predicted_temp: sample.temperature || 28,
+            predicted_bod: sample.bod || 12,
+            predicted_cod: sample.cod || 40,
+            predicted_tds: sample.tds || 300,
+            anomaly_score: Math.random() * 0.2,
+            risk_level: wqi < 50 ? 'high' : wqi < 70 ? 'medium' : 'low'
+          });
+        }
+      } else if (advJson && advJson.success && Array.isArray(advJson.timeline_data) && advJson.timeline_data.length > 0) {
+        // Fallback: use timeline yearly data to synthesize a 30-day forecast around latest year averages
+        const timeline = advJson.timeline_data;
+        const latest = timeline[timeline.length - 1];
+        const baseWqi = Math.round(latest.avg_wqi || 70);
+        const today = new Date();
+        for (let i = 0; i < 14; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          const noise = Math.round((Math.random() - 0.5) * 6);
+          forecasts.push({
+            date: date.toISOString().split('T')[0],
+            predicted_wqi: Math.max(20, Math.min(100, baseWqi + noise)),
+            confidence: 0.7 + Math.random() * 0.25,
+            upper_bound: Math.min(100, baseWqi + noise + 6),
+            lower_bound: Math.max(0, baseWqi + noise - 6),
+            predicted_ph: latest.avg_ph || 7.1,
+            predicted_do: latest.avg_do || 6.0,
+            predicted_temp: latest.avg_temperature || 28,
+            predicted_bod: latest.avg_bod || 12,
+            predicted_cod: latest.avg_cod || 40,
+            predicted_tds: latest.avg_tds || 300,
+            anomaly_score: Math.random() * 0.25,
+            risk_level: 'medium'
+          });
+        }
       }
-      
-      // Generate model performance data
+
+      // Keep some of the existing mock structures for modelPerformance, featureImportance, anomalies
       const modelPerformance = [
         { model: 'WQI Predictor', accuracy: 0.92, mse: 12.5, r2: 0.89, last_trained: '2024-10-01' },
         { model: 'pH Classifier', accuracy: 0.88, mse: 0.15, r2: 0.85, last_trained: '2024-10-02' },
         { model: 'Pollution Detector', accuracy: 0.94, mse: 8.3, r2: 0.91, last_trained: '2024-10-01' },
         { model: 'Anomaly Detector', accuracy: 0.87, mse: 0.23, r2: 0.82, last_trained: '2024-09-30' }
       ];
-      
-      // Generate feature importance
+
       const featureImportance = [
         { feature: 'Temperature', importance: 0.25, impact: 'high' },
         { feature: 'pH Level', importance: 0.22, impact: 'high' },
@@ -66,104 +105,58 @@ const AIAnalytics = React.memo(() => {
         { feature: 'Conductivity', importance: 0.12, impact: 'medium' },
         { feature: 'Location', importance: 0.08, impact: 'low' }
       ];
-      
-      // Generate anomaly detection results
-      const anomalies = [];
-      const locations = ['Bandra East', 'Mahim Creek', 'Dharavi', 'Kurla', 'Powai'];
-      
-      for (let i = 0; i < 8; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        
-        if (Math.random() > 0.6) { // 40% chance of anomaly
-          const location = locations[Math.floor(Math.random() * locations.length)];
-          const severity = Math.random() > 0.5 ? 'high' : 'medium';
-          
-          // Generate anomalous parameters
-          const parameters = ['pH', 'DO', 'Temperature', 'Turbidity', 'TDS'];
-          const selectedParams = parameters.slice(0, Math.floor(Math.random() * 3) + 1);
-          
-          const anomalous_parameters = selectedParams.map(param => ({
-            parameter: param,
-            value: param === 'pH' ? (Math.random() * 4 + 3).toFixed(1) :
-                   param === 'DO' ? (Math.random() * 15 + 2).toFixed(1) + ' mg/L' :
-                   param === 'Temperature' ? (Math.random() * 10 + 35).toFixed(1) + '°C' :
-                   param === 'Turbidity' ? (Math.random() * 50 + 20).toFixed(1) + ' NTU' :
-                   (Math.random() * 500 + 1000).toFixed(0) + ' ppm',
-            expected_range: param === 'pH' ? '6.5-8.5' :
-                          param === 'DO' ? '5-8 mg/L' :
-                          param === 'Temperature' ? '20-32°C' :
-                          param === 'Turbidity' ? '<10 NTU' :
-                          '<500 ppm'
-          }));
-          
-          anomalies.push({
-            date: date.toISOString(),
-            location: location,
-            type: ['pollution_spike', 'sensor_malfunction', 'unusual_pattern'][Math.floor(Math.random() * 3)],
-            severity: severity,
-            confidence: 0.75 + Math.random() * 0.2,
-            anomaly_score: Math.random() * 0.4 + 0.6,
-            anomalous_parameters: anomalous_parameters,
-            description: `AI detected unusual water quality pattern in ${location} requiring investigation`
-          });
-        }
-      }
-      
+
+      // Try to reuse anomalies from advanced features (smart_alerts) if available
+      const anomalies = (advJson && advJson.smart_alerts) ? advJson.smart_alerts : [];
+
+      // Satellite analysis / insights reuse from advanced features if present
+      const satellite_analysis = (advJson && advJson.environmental_impact) ? advJson.environmental_impact : {
+        pollution_detected: false,
+        analysis_timestamp: new Date().toISOString()
+      };
+
       setAiData({
         forecasts,
         modelPerformance,
         featureImportance,
         anomalies,
-        satellite_analysis: {
-          pollution_detected: Math.random() > 0.6,
-          pollution_types: [
-            {
-              type: 'industrial_discharge',
-              confidence: 0.85,
-              description: 'Chemical pollutants detected in industrial zone',
-              area_percentage: 12.5,
-              severity: 'high'
-            },
-            {
-              type: 'organic_waste',
-              confidence: 0.72,
-              description: 'Organic matter concentration above normal levels',
-              area_percentage: 8.3,
-              severity: 'medium'
-            }
-          ],
-          water_quality_indicators: {
-            turbidity: Math.random() > 0.5 ? 'high' : 'normal',
-            chlorophyll: Math.random() > 0.7 ? 'elevated' : 'normal',
-            sediment: Math.random() > 0.6 ? 'high' : 'low',
-            oil_spill: Math.random() > 0.9 ? 'detected' : 'none'
-          },
-          analysis_timestamp: new Date().toISOString(),
-          coverage_area: '25.6 km²',
-          resolution: '10m per pixel'
+        satellite_analysis,
+        insights: advJson?.environmental_impact || {
+          trend_analysis: 'No advanced insights available',
+          risk_assessment: 'unknown',
+          recommendations: []
         },
-        insights: {
-          trend_analysis: 'Water quality showing gradual improvement over past month',
-          risk_assessment: 'Medium risk of pollution events in next 7 days',
-          recommendations: [
-            'Increase monitoring frequency during peak hours',
-            'Focus on temperature and pH parameter optimization',
-            'Investigate anomalies detected in sector 3'
-          ]
-        },
-        ai_insights: {
-          model_accuracy: 92.5,
-          total_predictions: Math.floor(Math.random() * 10000) + 5000,
-          confidence_score: 0.87 + Math.random() * 0.1,
-          accuracy_trend: 'improving',
-          prediction_quality: 'excellent',
-          anomaly_detection_rate: 0.94,
-          false_positive_rate: 0.03
-        }
+        ai_insights: advJson?.ai_insights || { model_accuracy: 90 }
       });
     } catch (error) {
-      console.error('Error generating AI data:', error);
+      console.error('Error fetching AI graph data:', error);
+      // If fetch fails, fall back to the old mock generator to keep UI stable
+      try {
+        // small fallback: keep earlier random generation but shorter
+        const forecasts = [];
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(); date.setDate(date.getDate() + i);
+          const baseWQI = 70 + Math.round((Math.random() - 0.5) * 10);
+          forecasts.push({
+            date: date.toISOString().split('T')[0],
+            predicted_wqi: baseWQI,
+            confidence: 0.8,
+            upper_bound: Math.min(100, baseWQI + 6),
+            lower_bound: Math.max(0, baseWQI - 6),
+            predicted_ph: 7.1,
+            predicted_do: 6.0,
+            predicted_temp: 28,
+            predicted_bod: 12,
+            predicted_cod: 40,
+            predicted_tds: 300,
+            anomaly_score: 0.05,
+            risk_level: 'low'
+          });
+        }
+        setAiData({ forecasts, modelPerformance: [], featureImportance: [], anomalies: [] });
+      } catch (e) {
+        console.error('Fallback generation also failed', e);
+      }
     } finally {
       setLoading(false);
     }
