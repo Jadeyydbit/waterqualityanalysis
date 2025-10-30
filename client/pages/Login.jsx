@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,17 @@ export default function Login() {
   const [ripples, setRipples] = useState([]);
   const [fishPositions, setFishPositions] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Show registration success message if redirected from OTP verification
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+    if (location.state?.registeredEmail) {
+      setUsername(location.state.registeredEmail);
+    }
+  }, [location]);
 
   // Predefined admin accounts
   const adminAccounts = [
@@ -82,30 +93,35 @@ export default function Login() {
     setLoading(true);
 
     try {
-<<<<<<< HEAD
       // First, check if it's a predefined admin account
       const adminAccount = checkAdminCredentials(username, password);
-      
       if (adminAccount) {
         // Handle predefined admin login
-        localStorage.setItem('token', 'admin-token-' + Date.now());
-        localStorage.setItem('role', adminAccount.role);
-        localStorage.setItem('user', JSON.stringify({
+        const nameParts = adminAccount.name.split(' ');
+        const userObj = {
           id: adminAccount.username,
           username: adminAccount.username,
           email: adminAccount.email,
           name: adminAccount.name,
+          first_name: nameParts[0] || adminAccount.name,
+          last_name: nameParts.slice(1).join(' ') || '',
           role: adminAccount.role
-        }));
+        };
+        
+        localStorage.setItem('token', 'admin-token-' + Date.now());
+        localStorage.setItem('role', adminAccount.role);
+        localStorage.setItem('user', JSON.stringify(userObj));
+        localStorage.setItem('username', adminAccount.username);
+        localStorage.setItem('email', adminAccount.email);
+        localStorage.setItem('first_name', userObj.first_name);
+        localStorage.setItem('last_name', userObj.last_name);
+        
         toast.success(`Welcome back, ${adminAccount.name}!`);
         navigate('/dashboard');
         return;
       }
 
       // If not admin, try regular user login via API
-=======
-      // First try API authentication
->>>>>>> 1bd33e6a0f0835d3aaf766929273d63a16324659
       const response = await fetch('/api/login/', {
         method: 'POST',
         headers: {
@@ -117,10 +133,28 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store user data with proper name fields
+        const userData = data.user || {};
+        const nameParts = (userData.name || userData.username || '').split(' ');
+        
+        const userObj = {
+          ...userData,
+          first_name: userData.first_name || nameParts[0] || userData.username,
+          last_name: userData.last_name || nameParts.slice(1).join(' ') || ''
+        };
+        
+        // Determine role based on is_staff or is_superuser
+        const role = (userData.is_staff || userData.is_superuser) ? 'admin' : 'user';
+        
         localStorage.setItem('token', data.token);
-        localStorage.setItem('role', 'user'); // Regular user role
-        localStorage.setItem('user', JSON.stringify(data.user));
-        toast.success("Welcome back! Successfully logged in via API.");
+        localStorage.setItem('role', role);
+        localStorage.setItem('user', JSON.stringify(userObj));
+        localStorage.setItem('username', userData.username || username);
+        localStorage.setItem('email', userData.email || '');
+        localStorage.setItem('first_name', userObj.first_name);
+        localStorage.setItem('last_name', userObj.last_name);
+        
+        toast.success(`Welcome back! Successfully logged in via API.${role === 'admin' ? ' (Admin Access)' : ''}`);
         navigate('/dashboard');
         return;
       } else {
@@ -136,11 +170,21 @@ export default function Login() {
       if (adminUser) {
         // Create a mock token and store user info
         const mockToken = `offline_token_${adminUser.username}_${Date.now()}`;
-        const userInfo = { ...adminUser };
+        const nameParts = adminUser.name.split(' ');
+        const userInfo = { 
+          ...adminUser,
+          first_name: nameParts[0] || adminUser.name,
+          last_name: nameParts.slice(1).join(' ') || ''
+        };
         delete userInfo.password; // Remove password from stored info
         
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(userInfo));
+        localStorage.setItem('username', adminUser.username);
+        localStorage.setItem('email', adminUser.email);
+        localStorage.setItem('first_name', userInfo.first_name);
+        localStorage.setItem('last_name', userInfo.last_name);
+        
         toast.success(`Welcome back, ${adminUser.name}! (Offline mode)`);
         navigate('/dashboard');
       } else {
@@ -316,7 +360,7 @@ export default function Login() {
             <div className="space-y-6">
               <div className="relative group animate-slideInFromLeft animation-delay-300">
                 <Label htmlFor="username" className="text-sm font-medium text-gray-700 mb-2 block transition-colors duration-200 group-focus-within:text-cyan-600">
-                  Username
+                  Email or Username
                 </Label>
                 <div className="relative">
                   <Input
@@ -325,7 +369,7 @@ export default function Login() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 hover:border-cyan-300 focus:scale-105 bg-white/80 backdrop-blur-sm"
-                    placeholder="Enter your username"
+                    placeholder="Enter your email or username"
                     required
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>

@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { Waves, Home, FileText, Map, Calendar, Newspaper, LogOut, Menu, Sun, Moon, Users, Search } from "lucide-react";
+import { Waves, Home, FileText, Map, Calendar, Newspaper, LogOut, Menu, Sun, Moon, Users, Search, Shield, Download, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -24,8 +24,15 @@ const navigation = [
   { name: "🔮 Linear Regression", href: "/dashboard/linear-regression", icon: FileText },
   { name: "🗺️ GIS Mapping", href: "/dashboard/gis-mapping", icon: Map },
   { name: "📊 Reports", href: "/dashboard/reports", icon: FileText },
-  { name: "🌿 Cleanup Drives", href: "/dashboard/cleanup", icon: Calendar },
+  { name: "🌿 Cleanup Info", href: "/dashboard/cleanup", icon: Calendar },
+  { name: "🌊 Register for Drives", href: "/dashboard/cleanup-drives", icon: Calendar },
   { name: "📰 Blog & News", href: "/dashboard/news", icon: Newspaper },
+];
+
+const adminNavigation = [
+  { name: "⚡ Admin Dashboard", href: "/admin", icon: Shield },
+  { name: "👥 User Management", href: "/admin/users", icon: Users },
+  { name: "📥 Data Export", href: "/admin/export", icon: Download },
 ];
 
 export default function DashboardLayout({ children, demoMode = false }) {
@@ -34,7 +41,77 @@ export default function DashboardLayout({ children, demoMode = false }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [userData, setUserData] = useState(null);
   const role = localStorage.getItem("role") || "user";
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = () => {
+      try {
+        // Try to get from localStorage
+        const storedUser = localStorage.getItem('user');
+        const username = localStorage.getItem('username');
+        const email = localStorage.getItem('email');
+        
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setUserData(user);
+        } else if (username) {
+          // Create user object from localStorage data
+          setUserData({
+            username: username,
+            email: email || '',
+            first_name: localStorage.getItem('first_name') || username,
+            last_name: localStorage.getItem('last_name') || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    
+    fetchUserData();
+  }, []);
+
+  // Generate initials from user data
+  const getUserInitials = () => {
+    if (!userData) {
+      return role === "admin" ? "AD" : "US";
+    }
+    
+    const firstName = userData.first_name || userData.username || '';
+    const lastName = userData.last_name || '';
+    
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (firstName) {
+      return firstName.slice(0, 2).toUpperCase();
+    } else if (userData.username) {
+      return userData.username.slice(0, 2).toUpperCase();
+    }
+    
+    return role === "admin" ? "AD" : "US";
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!userData) {
+      return "Water Quality Team";
+    }
+    
+    const firstName = userData.first_name || '';
+    const lastName = userData.last_name || '';
+    
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    } else if (firstName) {
+      return firstName;
+    } else if (userData.username) {
+      return userData.username;
+    }
+    
+    return "Water Quality Team";
+  };
 
   // Filter navigation items based on search query
   const filteredNavigation = navigation.filter(item =>
@@ -79,7 +156,7 @@ export default function DashboardLayout({ children, demoMode = false }) {
             </div>
           </div>
 
-          <nav className="flex-1 px-4 py-6 space-y-3">
+          <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               
@@ -115,6 +192,39 @@ export default function DashboardLayout({ children, demoMode = false }) {
                 </Link>
               );
             })}
+
+            {/* Admin Section */}
+            {role === 'admin' && (
+              <>
+                <div className="pt-4 pb-2">
+                  <div className="px-4 mb-2">
+                    <div className="h-px bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300"></div>
+                  </div>
+                  <div className="px-4 flex items-center gap-2 text-xs font-bold text-purple-700 uppercase tracking-wider">
+                    <Shield className="w-4 h-4" />
+                    <span>Admin Tools</span>
+                  </div>
+                </div>
+                {adminNavigation.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={cn(
+                        "group relative flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300",
+                        isActive
+                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105"
+                          : "text-purple-700 hover:bg-purple-50 hover:text-purple-900 hover:scale-105"
+                      )}
+                    >
+                      <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
 
           <div className="px-4 py-4 border-t border-blue-200/50">
@@ -155,7 +265,7 @@ export default function DashboardLayout({ children, demoMode = false }) {
                 <span className="text-xs text-blue-100">Water Quality Monitor</span>
               </div>
             </div>
-            <nav className="flex-1 px-4 py-6 space-y-3">
+            <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 
@@ -191,6 +301,39 @@ export default function DashboardLayout({ children, demoMode = false }) {
                   </Link>
                 );
               })}
+
+              {/* Admin Section - Mobile */}
+              {role === 'admin' && (
+                <>
+                  <div className="pt-4 pb-2">
+                    <div className="px-4 mb-2">
+                      <div className="h-px bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300"></div>
+                    </div>
+                    <div className="px-4 flex items-center gap-2 text-xs font-bold text-purple-700 uppercase tracking-wider">
+                      <Shield className="w-4 h-4" />
+                      <span>Admin Tools</span>
+                    </div>
+                  </div>
+                  {adminNavigation.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300",
+                          isActive
+                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                            : "text-purple-700 hover:bg-purple-50 hover:text-purple-900"
+                        )}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
             </nav>
           </div>
         </SheetContent>
@@ -243,10 +386,14 @@ export default function DashboardLayout({ children, demoMode = false }) {
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs">
-                      {role === "admin" ? "AD" : "US"}
+                <Button 
+                  variant="ghost" 
+                  className="relative h-8 w-8 rounded-full hover:ring-2 hover:ring-blue-400 transition-all"
+                  title="View Profile & Settings"
+                >
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold">
+                      {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -254,10 +401,15 @@ export default function DashboardLayout({ children, demoMode = false }) {
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">Water Quality Team</p>
+                    <p className="text-sm font-medium">{getUserDisplayName()}</p>
                     <p className="text-xs text-muted-foreground capitalize">{role} Account</p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />

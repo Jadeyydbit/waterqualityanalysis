@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import Cleanup from "./pages/Cleanup";
+import CleanupDrives from "./pages/CleanupDrives";
 import News from "./pages/News";
 import Profile from "./pages/Profile";
 import RiverDetails from "./pages/RiverDetails";
@@ -33,6 +34,11 @@ import GISMapping from "./pages/GISMapping";
 import AIAnalytics from "./pages/AIAnalytics";
 import AdvancedFeatures from "./pages/AdvancedFeatures";
 import PerformanceMonitor from "./components/PerformanceMonitor";
+
+// Admin Pages
+import AdminDashboard from "./pages/AdminDashboard";
+import UserManagement from "./pages/UserManagement";
+import DataExport from "./pages/DataExport";
 
 import { FileText, Map, Calendar, Newspaper, Users } from "lucide-react";
 
@@ -167,6 +173,15 @@ const App = () => (
           />
 
           <Route
+            path="/dashboard/cleanup-drives"
+            element={
+              <DashboardLayout>
+                <CleanupDrives />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
             path="/dashboard/news"
             element={
               <DashboardLayout>
@@ -216,6 +231,34 @@ const App = () => (
             element={
               <DashboardLayout>
                 <Profile />
+              </DashboardLayout>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <DashboardLayout>
+                <AdminDashboard />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/admin/users"
+            element={
+              <DashboardLayout>
+                <UserManagement />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/admin/export"
+            element={
+              <DashboardLayout>
+                <DataExport />
               </DashboardLayout>
             }
           />

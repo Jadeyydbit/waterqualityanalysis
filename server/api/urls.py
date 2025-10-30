@@ -34,6 +34,14 @@ urlpatterns = [
     path('dashboard/latest-readings/', views.get_latest_readings, name='latest_readings'),
     path('advanced-features/', views.get_advanced_features_data, name='advanced_features'),
     path('3d-visualization/', views.get_3d_visualization_data, name='3d_visualization'),
+    
+    # Admin panel endpoints
+    path('admin/users/', views.admin_users, name='admin_users_list'),
+    path('admin/users/<int:user_id>/', views.admin_users, name='admin_users_detail'),
+    path('export-data/', views.export_data, name='export_data'),
+    
+    # Cleanup drives endpoints
+    path('cleanup-drives/', views.cleanup_drives, name='cleanup_drives'),
 ]
 
 # Define your API endpoints here, e.g.:

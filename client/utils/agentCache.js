@@ -1,6 +1,6 @@
 // Simple in-memory cache with TTL, no external deps
-const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
-const MAX_ENTRIES = 100;
+const CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutes - longer cache
+const MAX_ENTRIES = 200; // More cache entries
 
 const store = new Map();
 

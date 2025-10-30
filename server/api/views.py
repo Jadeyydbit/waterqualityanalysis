@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -299,27 +300,63 @@ def signup(request):
     phone = request.data.get('phone')
     password = request.data.get('password')
     
-    # Check for duplicate email or phone
+    # Check for duplicate email or phone in UserRegister
     if UserRegister.objects.filter(Q(email=email) | Q(phone_number=phone)).exists():
         return Response({'error': 'Email or phone already exists.'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Create user in UserRegister table
-    user = UserRegister(
-        full_name=name,
-        email=email,
-        phone_number=phone if phone else None,
-        password=hashlib.sha256(password.encode()).hexdigest()
-    )
-    user.save()
-
-    # Send welcome email after successful signup
+    # Check for duplicate in Django User table
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+    
     try:
-        first_name = name.split()[0] if name else email
-        send_welcome_email(email, first_name)
-    except Exception as e:
-        print(f"Welcome email sending failed: {e}")
+        # Split name into first and last name
+        name_parts = name.split() if name else []
+        first_name = name_parts[0] if len(name_parts) > 0 else ''
+        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+        
+        # Generate username from email if not provided
+        username = email.split('@')[0]
+        
+        # Make username unique if it already exists
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+        
+        # Create Django User (for authentication)
+        django_user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,  # Django will hash this properly
+            first_name=first_name,
+            last_name=last_name
+        )
+        
+        # Create user in UserRegister table (for legacy compatibility)
+        user = UserRegister(
+            full_name=name,
+            email=email,
+            phone_number=phone if phone else None,
+            password=hashlib.sha256(password.encode()).hexdigest()
+        )
+        user.save()
 
-    return Response({'success': True, 'email': user.email})
+        # Send welcome email after successful signup
+        try:
+            send_welcome_email(email, first_name if first_name else username)
+        except Exception as e:
+            print(f"Welcome email sending failed: {e}")
+
+        return Response({
+            'success': True, 
+            'email': user.email,
+            'username': username,
+            'message': 'Account created successfully! You can now login.'
+        })
+    except Exception as e:
+        print(f"Signup error: {e}")
+        return Response({'error': f'Account creation failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -330,6 +367,7 @@ from django.conf import settings
 
 # Django Admin Login API endpoint
 @api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def login(request):
     username = request.data.get('username')
@@ -338,8 +376,16 @@ def login(request):
     if not username or not password:
         return Response({'message': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Authenticate with Django's built-in authentication
+    # Try to authenticate with username first
     user = authenticate(username=username, password=password)
+    
+    # If that fails, try to find user by email and authenticate
+    if user is None:
+        try:
+            user_by_email = User.objects.get(email=username)
+            user = authenticate(username=user_by_email.username, password=password)
+        except User.DoesNotExist:
+            pass
     
     if user is not None:
         if user.is_active:
@@ -355,6 +401,7 @@ def login(request):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
+                    'name': f"{user.first_name} {user.last_name}".strip() or user.username,
                     'is_staff': user.is_staff,
                     'is_superuser': user.is_superuser,
                 }
@@ -366,6 +413,7 @@ def login(request):
 
 # Django User Registration API endpoint with welcome email
 @api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def register(request):
     username = request.data.get('username')
@@ -545,7 +593,7 @@ def custom_login(request):
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 # Get current user profile
@@ -1118,3 +1166,261 @@ def get_3d_visualization_data(request):
             'error': str(e),
             'success': False
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Admin Panel APIs
+@api_view(['GET', 'POST', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def admin_users(request, user_id=None):
+    """Admin user management endpoint"""
+    from django.contrib.auth.models import User
+    
+    # For now, allow all authenticated users to view users (for testing)
+    # In production, uncomment the admin check below
+    # if not request.user.is_staff and not request.user.is_superuser:
+    #     return Response({'error': 'Access denied. Admin privileges required.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    if request.method == 'GET':
+        if user_id:
+            # Get specific user
+            try:
+                user = User.objects.get(id=user_id)
+                return Response({
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'is_active': user.is_active,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser,
+                    'date_joined': user.date_joined,
+                    'last_login': user.last_login,
+                    'role': 'admin' if user.is_staff or user.is_superuser else 'user'
+                })
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # Get all users
+            users = User.objects.all()
+            user_list = []
+            for user in users:
+                user_list.append({
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'is_active': user.is_active,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser,
+                    'date_joined': user.date_joined,
+                    'last_login': user.last_login,
+                    'role': 'admin' if user.is_staff or user.is_superuser else 'user'
+                })
+            return Response({'users': user_list, 'total': len(user_list)})
+    
+    elif request.method == 'PATCH' and user_id:
+        # Update user
+        try:
+            user = User.objects.get(id=user_id)
+            
+            # Update role if provided
+            if 'role' in request.data:
+                if request.data['role'] == 'admin':
+                    user.is_staff = True
+                else:
+                    user.is_staff = False
+            
+            # Update active status if provided
+            if 'is_active' in request.data:
+                user.is_active = request.data['is_active']
+            
+            user.save()
+            
+            return Response({
+                'message': 'User updated successfully',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'role': 'admin' if user.is_staff else 'user',
+                    'is_active': user.is_active
+                }
+            })
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    elif request.method == 'DELETE' and user_id:
+        # Delete user
+        try:
+            user = User.objects.get(id=user_id)
+            
+            # Prevent deleting yourself
+            if user.id == request.user.id:
+                return Response({'error': 'Cannot delete your own account'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            email = user.email
+            user.delete()
+            
+            # Also delete from UserRegister if exists (by email, not username)
+            UserRegister.objects.filter(email=email).delete()
+            
+            return Response({'message': 'User deleted successfully'})
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_data(request):
+    """Export Mithi River data with filtering"""
+    try:
+        import pandas as pd
+        import os
+        from datetime import datetime
+        
+        # For now, allow all authenticated users to export (for testing)
+        # In production, uncomment the admin check below
+        # if not request.user.is_staff and not request.user.is_superuser:
+        #     return Response({'error': 'Access denied. Admin privileges required.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Get query parameters
+        start_date = request.GET.get('start', '2000-01-01')
+        end_date = request.GET.get('end', '2024-12-31')
+        
+        # Path to CSV file
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mithi_river_data.csv')
+        
+        if not os.path.exists(csv_path):
+            return Response({'error': 'CSV file not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Read CSV
+        df = pd.read_csv(csv_path)
+        
+        # Filter by date if Date column exists
+        if 'Date' in df.columns:
+            df['Date'] = pd.to_datetime(df['Date'])
+            start = pd.to_datetime(start_date)
+            end = pd.to_datetime(end_date)
+            df = df[(df['Date'] >= start) & (df['Date'] <= end)]
+            df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
+        
+        # Convert to CSV string
+        csv_content = df.to_csv(index=False)
+        
+        from django.http import HttpResponse
+        response = HttpResponse(csv_content, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="mithi_river_export_{start_date}_to_{end_date}.csv"'
+        
+        return response
+        
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def cleanup_drives(request):
+    """
+    GET: Retrieve all cleanup drives
+    POST: Create a new cleanup drive (admin only)
+    """
+    try:
+        if request.method == 'GET':
+            # For now, return mock data since we don't have a model yet
+            # In production, this should query from database
+            drives = [
+                {
+                    'id': 1,
+                    'title': 'Mithi River Cleanup - Bandra West',
+                    'description': 'Join us for a community cleanup drive at Mithi River, Bandra West section.',
+                    'location': 'Bandra West, Mumbai',
+                    'date': '2025-11-15',
+                    'time': '07:00 AM',
+                    'duration': '4 hours',
+                    'max_volunteers': 50,
+                    'registered_count': 23,
+                    'meeting_point': 'Bandra West Railway Station Exit',
+                    'contact_person': 'Priya Sharma',
+                    'contact_phone': '+91-98765-43210',
+                    'equipment_provided': 'Gloves, Garbage bags, Safety vests, Refreshments',
+                    'requirements': 'Please wear comfortable clothing and closed shoes',
+                    'status': 'upcoming',
+                    'created_by': 'Admin',
+                    'created_at': '2025-10-25'
+                },
+                {
+                    'id': 2,
+                    'title': 'Mithi River Cleanup - Powai Lake Area',
+                    'description': 'Cleanup drive focusing on the Powai Lake confluence area.',
+                    'location': 'Powai, Mumbai',
+                    'date': '2025-11-22',
+                    'time': '06:30 AM',
+                    'duration': '5 hours',
+                    'max_volunteers': 75,
+                    'registered_count': 45,
+                    'meeting_point': 'Powai Lake Garden Entrance',
+                    'contact_person': 'Rajesh Kumar',
+                    'contact_phone': '+91-98765-43211',
+                    'equipment_provided': 'Gloves, Bags, Boots, Breakfast & Lunch',
+                    'requirements': 'Minimum age 16 years, bring water bottle',
+                    'status': 'upcoming',
+                    'created_by': 'Admin',
+                    'created_at': '2025-10-26'
+                }
+            ]
+            
+            return Response({
+                'success': True,
+                'drives': drives
+            })
+            
+        elif request.method == 'POST':
+            # Check if user is admin
+            if not request.user.is_staff and not request.user.is_superuser:
+                return Response({
+                    'error': 'Only administrators can create cleanup drives',
+                    'success': False
+                }, status=status.HTTP_403_FORBIDDEN)
+            
+            # Create new cleanup drive
+            data = request.data
+            new_drive = {
+                'id': random.randint(1000, 9999),
+                'title': data.get('title'),
+                'description': data.get('description'),
+                'location': data.get('location'),
+                'date': data.get('date'),
+                'time': data.get('time'),
+                'duration': data.get('duration'),
+                'max_volunteers': int(data.get('max_volunteers', 0)),
+                'registered_count': 0,
+                'meeting_point': data.get('meeting_point'),
+                'contact_person': data.get('contact_person'),
+                'contact_phone': data.get('contact_phone'),
+                'equipment_provided': data.get('equipment_provided', ''),
+                'requirements': data.get('requirements', ''),
+                'status': 'upcoming',
+                'created_by': request.user.username,
+                'created_at': timezone.now().strftime('%Y-%m-%d')
+            }
+            
+            # In production, save to database here
+            # CleanupDrive.objects.create(**new_drive)
+            
+            return Response({
+                'success': True,
+                'drive': new_drive,
+                'message': 'Cleanup drive created successfully'
+            }, status=status.HTTP_201_CREATED)
+            
+    except Exception as e:
+        return Response({
+            'error': str(e),
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

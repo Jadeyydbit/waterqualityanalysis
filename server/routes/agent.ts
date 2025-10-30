@@ -21,8 +21,8 @@ export const handleAgentStream: RequestHandler = async (req, res) => {
   try {
     const stream = await anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 1500,
-      temperature: 0.1,
+      max_tokens: 800, // Reduced for speed
+      temperature: 0, // Deterministic for faster output
       messages: [
         {
           role: "user",
@@ -59,8 +59,8 @@ export const handleAgent: RequestHandler = async (req, res) => {
   try {
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 1500,
-      temperature: 0.1,
+      max_tokens: 800, // Reduced for speed
+      temperature: 0, // Deterministic for faster output
       messages: [
         {
           role: "user",

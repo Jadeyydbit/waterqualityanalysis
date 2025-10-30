@@ -72,16 +72,23 @@ export default function OtpVerification() {
 					body: JSON.stringify({
 						name: formData?.firstName + ' ' + formData?.lastName,
 						email: userEmail,
-						phone: '',
+						phone: formData?.phone || '',
 						password: formData?.password
 					}),
 				});
 				const signupData = await signupResponse.json();
 				if (signupResponse.ok && signupData.success) {
-					toast.success("Verification successful! A welcome email has been sent.");
+					const username = signupData.username || userEmail.split('@')[0];
+					toast.success(`Verification successful! You can now login with email: ${userEmail} or username: ${username}`);
 					setSuccess(true);
 					setTimeout(() => {
-						navigate('/login');
+						navigate('/login', { 
+							state: { 
+								registeredEmail: userEmail,
+								registeredUsername: username,
+								message: `Welcome! Login with your email (${userEmail}) or username (${username})`
+							} 
+						});
 					}, 2000);
 				} else {
 					setError(signupData.error || "Account creation failed.");
