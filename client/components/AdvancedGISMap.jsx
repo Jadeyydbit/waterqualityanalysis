@@ -199,9 +199,9 @@ const createCustomIcon = (status, type = 'sensor') => {
   });
 };
 
-// Generate heatmap data
-const generateHeatmapData = () => {
-  return SENSOR_LOCATIONS.map(sensor => [
+// Generate heatmap data (move inside component to use state)
+const generateHeatmapData = (sensors) => {
+  return sensors.map(sensor => [
     sensor.coordinates[0],
     sensor.coordinates[1],
     Math.max(0, (100 - sensor.wqi) / 100) // Inverse WQI for heat intensity
@@ -216,7 +216,64 @@ export default function AdvancedGISMap() {
   const [showGeofences, setShowGeofences] = useState(false);
   const [mapCenter, setMapCenter] = useState([19.0728, 72.8826]); // Mithi River center
   const [routeOptimization, setRouteOptimization] = useState(false);
+  const [sensorLocations, setSensorLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const mapRef = useRef();
+
+  // Fetch real sensor data from API
+  useEffect(() => {
+    const fetchSensorData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/advanced-features/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch sensor data');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.sensor_network) {
+          // Map API data to sensor locations
+          const mappedSensors = data.sensor_network.map((sensor, index) => ({
+            id: sensor.id,
+            name: sensor.name,
+            coordinates: [19.0760 + (index * 0.02), 72.8777 + (index * 0.015)], // Distribute along Mithi River
+            location: sensor.location || sensor.name,
+            wqi: Math.round((100 - sensor.tds/50 - sensor.bod*3 - sensor.cod/2)),
+            tds: sensor.tds,
+            bod: sensor.bod,
+            cod: sensor.cod,
+            temp: sensor.temperature,
+            ph: sensor.ph,
+            do: sensor.dissolved_oxygen,
+            status: sensor.status === 'active' ? 
+                   (sensor.dissolved_oxygen > 6 ? 'good' : sensor.dissolved_oxygen > 4 ? 'moderate' : 'poor') : 
+                   'very_poor',
+            lastUpdate: sensor.last_reading,
+            alerts: sensor.dissolved_oxygen < 4 ? ['Low DO concentration'] : []
+          }));
+          
+          setSensorLocations(mappedSensors);
+        } else {
+          // Fallback to original hardcoded data
+          setSensorLocations(SENSOR_LOCATIONS);
+        }
+      } catch (error) {
+        console.error('Error fetching sensor data:', error);
+        // Fallback to original hardcoded data
+        setSensorLocations(SENSOR_LOCATIONS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSensorData();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchSensorData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Calculate pollution zones for geofencing
   const GEOFENCE_ZONES = [
@@ -292,6 +349,7 @@ export default function AdvancedGISMap() {
           </h1>
           <p className="text-lg text-gray-600">
             Real-time Geographic Information System for Water Quality Management
+            {loading && <span className="ml-2 text-blue-600">• Loading sensor data...</span>}
           </p>
         </div>
 
@@ -473,7 +531,7 @@ export default function AdvancedGISMap() {
                       </LayersControl.Overlay>
 
                       {/* Sensor Markers */}
-                      {SENSOR_LOCATIONS.map(sensor => (
+                      {sensorLocations.map(sensor => (
                         <LayersControl.Overlay key={sensor.id} checked name={`📍 ${sensor.name}`}>
                           <Marker
                             position={sensor.coordinates}
