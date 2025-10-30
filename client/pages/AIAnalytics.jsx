@@ -1042,14 +1042,6 @@ const AIAnalytics = React.memo(() => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-});
-
-AIAnalytics.displayName = 'AIAnalytics';
 
             {/* Fast Agent Panel */}
             <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl lg:col-span-2">
@@ -1077,5 +1069,13 @@ AIAnalytics.displayName = 'AIAnalytics';
                 />
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+});
+
+AIAnalytics.displayName = 'AIAnalytics';
 
 export default AIAnalytics;
