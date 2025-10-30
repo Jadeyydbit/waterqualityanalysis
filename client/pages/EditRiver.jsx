@@ -56,8 +56,8 @@ export default function EditRiver() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/dashboard/admin")}>
-              Back to Admin
+            <Button onClick={() => navigate("/dashboard")}>
+              Back to Dashboard
             </Button>
           </CardContent>
         </Card>
@@ -108,7 +108,7 @@ export default function EditRiver() {
 
     // Use original slug to update in place without creating a copy
     upsertRiver(updated, slug);
-    navigate("/dashboard/admin");
+    navigate("/dashboard");
   };
 
   return (

@@ -10,13 +10,14 @@ import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import OtpVerification from "./pages/OtpVerification";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import Cleanup from "./pages/Cleanup";
 import News from "./pages/News";
+import Profile from "./pages/Profile";
 import RiverDetails from "./pages/RiverDetails";
-import Admin from "./pages/Admin";
 import AddRiver from "./pages/AddRiver";
 import EditRiver from "./pages/EditRiver";
 import EditRiverInfo from "./pages/EditRiverInfo";
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/otp-verification" element={<OtpVerification />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Dashboard Routes */}
@@ -183,61 +185,37 @@ const App = () => (
           />
 
           <Route
-            path="/dashboard/cleanup"
-            element={
-              <DashboardLayout>
-                <PlaceholderPage
-                  title="Cleanup Drives"
-                  description="Register as a volunteer and view upcoming cleanup events."
-                  icon={<Calendar className="w-8 h-8 text-muted-foreground" />}
-                />
-              </DashboardLayout>
-            }
-          />
-
-          <Route
-            path="/dashboard/news"
-            element={
-              <DashboardLayout>
-                <PlaceholderPage
-                  title="Blog & News"
-                  description="Read awareness articles and latest news about water conservation."
-                  icon={<Newspaper className="w-8 h-8 text-muted-foreground" />}
-                />
-              </DashboardLayout>
-            }
-          />
-
-          <Route
-            path="/dashboard/admin"
-            element={
-              <DashboardLayout>
-                <Admin />
-              </DashboardLayout>
-            }
-          />
-
-          <Route
-            path="/dashboard/admin/rivers/new"
+            path="/dashboard/add-river"
             element={
               <DashboardLayout>
                 <AddRiver />
               </DashboardLayout>
             }
           />
+
           <Route
-            path="/dashboard/admin/rivers/:slug/edit"
+            path="/dashboard/edit-river/:id"
             element={
               <DashboardLayout>
                 <EditRiver />
               </DashboardLayout>
             }
           />
+
           <Route
-            path="/dashboard/admin/rivers/:slug/edit-info"
+            path="/dashboard/edit-river-info/:id"
             element={
               <DashboardLayout>
                 <EditRiverInfo />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <DashboardLayout>
+                <Profile />
               </DashboardLayout>
             }
           />

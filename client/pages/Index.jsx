@@ -90,18 +90,6 @@ const App = () => (
               </DashboardLayout>
             }
           />
-          <Route
-            path="/dashboard/admin"
-            element={
-              <DashboardLayout>
-                <PlaceholderPage
-                  title="Admin Dashboard"
-                  description="Manage users & reports."
-                  icon={<Users className="w-8 h-8 text-muted-foreground" />}
-                />
-              </DashboardLayout>
-            }
-          />
 
           {/* Redirect /home → Dashboard */}
           <Route path="/home" element={<Dashboard />} />

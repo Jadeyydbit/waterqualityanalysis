@@ -1,255 +1,337 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { ExternalLink, Calendar, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-// --- Icon Components ---
-const Droplets = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.7-3.02C8.23 8.5 7 9.82 7 11.5c0 .96.78 1.75 1.75 1.75"/>
-    <path d="M10.41 9.92a2.2 2.2 0 0 0-1.44 3.2.5.5 0 0 1-.36.36c-1.3.56-2.61.03-3.2-1.12-1.24-2.4-1.03-5.3.5-7.4C7 3.82 8.7 3 10.5 3c2.7 0 5.2 2.7 5.5 5.5.3 2.4-1.1 4.5-3.1 5.5"/>
-  </svg>
-);
-const Calendar = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y2="2"/><line x1="8" x2="8" y2="2"/><line x1="3" x2="21" y1="10"/></svg>
-);
-const User = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-);
-const Tag = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
-);
-const Search = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-);
-const ArrowLeft = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-);
+//  API Keys for multiple news sources
+const NEWS_APIS = {
+  gnews: '904dd807db2f1b8735aa9f91d0c5916f', // Your current GNews key
+  mediastack: 'a8578630c7451b28bd1ee8b89b63b868', // MediaStack API (browser-friendly)
+};
 
+export default function News() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-// --- Sample Data ---
-const articles = [
-    {
-        id: 1,
-        title: "The Silent Crisis: How Urban Pollution is Choking the Mithi River",
-        excerpt: "Once a vital lifeline for Mumbai, the Mithi River is now a symbol of urban neglect. This in-depth report explores the primary sources of pollution and the urgent need for intervention.",
-        imageUrl: "https://placehold.co/1200x600/34495e/ffffff?text=Mithi+River+Crisis",
-        author: "Dr. Anjali Sharma",
-        date: "2025-10-08",
-        category: "Scientific Findings",
-        content: `
-            <p>The Mithi River, a confluence of tail-water discharges of the Powai and Vihar lakes, has a story that mirrors Mumbai's own rapid, often unregulated, urban expansion. Spanning approximately 18 kilometers, it meets the Arabian Sea at Mahim Creek, but its journey is fraught with peril. Decades of industrial effluent, untreated sewage, and solid waste dumping have transformed this once-thriving ecosystem into one of the most polluted rivers in India.</p>
-            <p>Our recent studies, conducted over a 12-month period, reveal alarming levels of heavy metals such as lead, mercury, and cadmium, particularly near industrial zones. These contaminants not only decimate aquatic life but also pose significant health risks to the dense human populations living along the riverbanks. The Dissolved Oxygen (DO) levels were found to be critically low, often below 2 mg/L, which is insufficient to support most fish species.</p>
-            <h3 class="text-2xl font-bold mt-6 mb-3">The Path Forward</h3>
-            <p>Addressing this crisis requires a multi-pronged approach. Stricter enforcement of industrial discharge norms, investment in decentralized sewage treatment plants, and a city-wide campaign to curb plastic waste are critical first steps. Community participation is not just desirable; it is essential. The health of the Mithi is intrinsically linked to the health of Mumbai.</p>
-        `,
-    },
-    {
-        id: 2,
-        title: "Community Power: The Heroes of the Mahim Causeway Cleanup",
-        excerpt: "Meet the volunteers who are turning the tide against pollution. A heartwarming look at a recent cleanup drive and the incredible impact of citizen action.",
-        imageUrl: "https://placehold.co/600x400/27ae60/ffffff?text=Community+Spotlight",
-        author: "Rohan Desai",
-        date: "2025-09-15",
-        category: "Community Spotlight",
-        content: "<p>On a bright Saturday morning, while most of Mumbai was still waking up, a group of over 100 dedicated citizens gathered at the Mahim Causeway. Armed with gloves, garbage bags, and an unwavering spirit, they embarked on a mission: to reclaim a small patch of their city from the clutches of plastic waste. This is the story of their success and a testament to the power of community.</p>",
-    },
-    {
-        id: 3,
-        title: "5 Simple Ways You Can Help Save the Mithi River From Home",
-        excerpt: "Think you can't make a difference? Think again. Here are five practical, easy-to-implement tips for every Mumbaikar to contribute to the river's restoration.",
-        imageUrl: "https://placehold.co/600x400/3498db/ffffff?text=Conservation+Tips",
-        author: "Priya Mehta",
-        date: "2025-09-02",
-        category: "Conservation Tips",
-        content: "<p>Saving a river as large and complex as the Mithi can feel like an overwhelming task, but the journey of a thousand miles begins with a single step. Here are five simple actions you can take in your daily life to be part of the solution: 1. Segregate your waste. 2. Reduce single-use plastics. 3. Conserve water. 4. Dispose of chemicals responsibly. 5. Spread awareness.</p>",
-    },
-    {
-        id: 4,
-        title: "New Policy Announced: BMC to Install 20 New Real-Time Water Quality Sensors",
-        excerpt: "In a landmark move, the Brihanmumbai Municipal Corporation has approved a project to install state-of-the-art monitoring sensors along the Mithi River.",
-        imageUrl: "https://placehold.co/600x400/f39c12/ffffff?text=Event+News",
-        author: "Civic Reporter",
-        date: "2025-10-01",
-        category: "Event News",
-        content: "<p>The BMC has taken a significant step towards data-driven environmental governance. The new sensors will provide real-time data on key parameters like pH, turbidity, and dissolved oxygen, which will be accessible to the public through a dedicated portal. This initiative promises to bring much-needed transparency and accountability to the river's restoration efforts.</p>",
-    },
-];
+  useEffect(() => {
+    fetchNews();
+  }, []);
 
-const featuredArticle = articles[0];
-const otherArticles = articles.slice(1);
-const categories = ["All", ...new Set(articles.map(a => a.category))];
+  const fetchNews = async () => {
+    setLoading(true);
+    setError(null);
+    let allArticles = [];
 
-// --- Reusable Components ---
-function Header() {
-    return (
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 left-0 right-0 z-50 border-b border-gray-200/70">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center space-x-3">
-                        <Droplets className="h-8 w-8 text-blue-600" />
-                        <div>
-                            <span className="text-xl font-bold text-gray-800">Mithi River Guardian</span>
-                            <p className="text-xs text-gray-500">Blog & News</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-    );
-}
+    try {
+      // Try both APIs in sequence
+      const apis = [
+        () => fetchFromGNews(),
+        () => fetchFromMediaStack(),
+      ];
 
-function Footer() {
-    return (
-        <footer className="bg-gray-100">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
-                <p>&copy; {new Date().getFullYear()} Mithi River Guardian. All rights reserved.</p>
-            </div>
-        </footer>
-    );
-}
-
-// --- Page View Components ---
-function BlogListView({ articles, onArticleSelect, onSearch, onFilter }) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [activeCategory, setActiveCategory] = useState("All");
-
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-        onSearch(e.target.value);
-    };
-
-    const handleFilter = (category) => {
-        setActiveCategory(category);
-        onFilter(category);
-    };
-
-    return (
-        <>
-            {/* Featured Article */}
-            <section className="bg-gray-50">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="order-2 lg:order-1">
-                            <p className="text-blue-600 font-semibold">{featuredArticle.category}</p>
-                            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mt-2">{featuredArticle.title}</h1>
-                            <p className="mt-4 text-lg text-gray-600">{featuredArticle.excerpt}</p>
-                             <div className="flex items-center space-x-4 text-sm text-gray-500 mt-4">
-                                <span className="flex items-center"><User className="w-4 h-4 mr-1.5"/>{featuredArticle.author}</span>
-                                <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5"/>{new Date(featuredArticle.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                            </div>
-                            <button onClick={() => onArticleSelect(featuredArticle)} className="mt-6 inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 transition">
-                                Read Full Article
-                            </button>
-                        </div>
-                        <div className="order-1 lg:order-2">
-                             <img src={featuredArticle.imageUrl} alt={featuredArticle.title} className="rounded-2xl shadow-xl object-cover w-full h-full"/>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            {/* Filter and Search */}
-            <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="relative w-full md:w-1/3">
-                        <input type="text" placeholder="Search articles..." value={searchTerm} onChange={handleSearch} className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"/>
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"/>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        {categories.map(cat => (
-                            <button key={cat} onClick={() => handleFilter(cat)} className={`px-4 py-2 text-sm font-medium rounded-full transition ${activeCategory === cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                 </div>
-            </section>
-
-            {/* Article Grid */}
-            <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {articles.map(article => (
-                        <div key={article.id} className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group border border-gray-200/80">
-                            <img src={article.imageUrl} alt={article.title} className="h-56 w-full object-cover"/>
-                            <div className="p-6 flex flex-col flex-grow">
-                                <div>
-                                    <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{article.category}</span>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mt-3">{article.title}</h3>
-                                <p className="mt-2 text-gray-600 text-sm flex-grow">{article.excerpt}</p>
-                                <button onClick={() => onArticleSelect(article)} className="mt-4 text-blue-600 font-semibold self-start hover:text-blue-800 transition">
-                                    Read more &rarr;
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        </>
-    );
-}
-
-function ArticleDetailView({ article, onBack }) {
-    return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fade-in">
-            <button onClick={onBack} className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800 mb-8">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to All Articles
-            </button>
-            <div className="max-w-4xl mx-auto">
-                <span className="text-base font-semibold text-blue-600">{article.category}</span>
-                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mt-2">{article.title}</h1>
-                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 mt-4 border-b pb-4 mb-8">
-                    <span className="flex items-center"><User className="w-4 h-4 mr-1.5"/>{article.author}</span>
-                    <span className="flex items-center"><Calendar className="w-4 h-4 mr-1.5"/>{new Date(article.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-
-                <img src={article.imageUrl.replace('600x400', '1200x600')} alt={article.title} className="rounded-2xl shadow-xl w-full object-cover mb-8"/>
-                
-                <article className="prose lg:prose-xl max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: article.content }}></article>
-            </div>
-        </div>
-    );
-}
-
-// --- Main App Component ---
-export default function BlogNewsPage() {
-    const [selectedArticle, setSelectedArticle] = useState(null);
-    const [filteredArticles, setFilteredArticles] = useState(otherArticles);
-
-    const handleSearch = (term) => {
-        const lowercasedTerm = term.toLowerCase();
-        const results = otherArticles.filter(article => 
-            article.title.toLowerCase().includes(lowercasedTerm) ||
-            article.excerpt.toLowerCase().includes(lowercasedTerm) ||
-            article.author.toLowerCase().includes(lowercasedTerm)
-        );
-        setFilteredArticles(results);
-    };
-
-    const handleFilter = (category) => {
-        if (category === "All") {
-            setFilteredArticles(otherArticles);
-        } else {
-            const results = otherArticles.filter(article => article.category === category);
-            setFilteredArticles(results);
+      for (const apiCall of apis) {
+        try {
+          const articles = await apiCall();
+          if (articles && articles.length > 0) {
+            console.log(`API returned ${articles.length} articles from ${articles[0]?.apiSource}`);
+            allArticles = [...allArticles, ...articles];
+          }
+        } catch (apiError) {
+          console.warn('API failed:', apiError.message);
         }
-    };
+      }
 
-    return (
-        <div className="bg-white min-h-screen">
-            <Header />
-            <main>
-                {selectedArticle ? (
-                    <ArticleDetailView article={selectedArticle} onBack={() => setSelectedArticle(null)} />
-                ) : (
-                    <BlogListView 
-                        articles={filteredArticles} 
-                        onArticleSelect={setSelectedArticle}
-                        onSearch={handleSearch}
-                        onFilter={handleFilter}
-                    />
-                )}
-            </main>
-            <Footer />
-        </div>
+      console.log(`Total articles before filtering: ${allArticles.length}`);
+      console.log('API sources:', [...new Set(allArticles.map(a => a.apiSource))]);
+
+      // Remove duplicates and filter for Mithi River content
+      const uniqueArticles = removeDuplicates(allArticles);
+      console.log('Unique articles before Mithi filter:', uniqueArticles.map(a => ({
+        title: a.title,
+        source: a.apiSource,
+        hasMithi: a.title.toLowerCase().includes('mithi') || a.description.toLowerCase().includes('mithi')
+      })));
+
+      const mithiArticles = uniqueArticles.filter(article => {
+        const title = article.title.toLowerCase();
+        const description = article.description.toLowerCase();
+        const hasMithi = title.includes('mithi') || description.includes('mithi');
+        if (!hasMithi) {
+          console.log(`Filtered out (no Mithi): "${article.title}" from ${article.apiSource}`);
+        }
+        return hasMithi;
+      });
+
+      console.log(`Found ${allArticles.length} total articles, ${mithiArticles.length} about Mithi River`);
+      console.log('Final Mithi articles by source:', [...new Set(mithiArticles.map(a => a.apiSource))]);
+
+      if (mithiArticles.length === 0) {
+        throw new Error('No articles mentioning Mithi River found across both APIs');
+      }
+
+      // Ensure balanced mix from both sources
+      const gnewsArticles = mithiArticles.filter(a => a.apiSource === 'GNews');
+      const mediastackArticles = mithiArticles.filter(a => a.apiSource === 'MediaStack');
+      
+      console.log(`GNews articles: ${gnewsArticles.length}, MediaStack articles: ${mediastackArticles.length}`);
+      
+      // Interleave articles from both sources for balanced display
+      const balancedArticles = [];
+      const maxLength = Math.max(gnewsArticles.length, mediastackArticles.length);
+      
+      for (let i = 0; i < maxLength && balancedArticles.length < 12; i++) {
+        if (i < gnewsArticles.length) balancedArticles.push(gnewsArticles[i]);
+        if (i < mediastackArticles.length && balancedArticles.length < 12) balancedArticles.push(mediastackArticles[i]);
+      }
+      
+      console.log('Final balanced articles:', balancedArticles.map(a => `${a.apiSource}: ${a.title.substring(0, 50)}...`));
+      
+      setArticles(balancedArticles);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Both news APIs failed:', err);
+      setError(err.message);
+      setArticles(getFallbackNews());
+      setLastUpdated(new Date());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // GNews API
+  const fetchFromGNews = async () => {
+    const response = await fetch(
+      `https://gnews.io/api/v4/search?q="Mithi River"&lang=en&max=10&apikey=${NEWS_APIS.gnews}`
     );
+    const data = await response.json();
+    
+    if (data.errors) throw new Error(`GNews: ${data.errors[0]}`);
+    if (!response.ok) throw new Error(`GNews: ${data.message || 'Failed to fetch'}`);
+    
+    return data.articles?.map(article => ({
+      id: `gnews-${article.url}`,
+      title: article.title,
+      description: article.description,
+      date: new Date(article.publishedAt).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      }),
+      source: article.source.name,
+      url: article.url,
+      imageUrl: article.image,
+      category: categorizeArticle(article.title + ' ' + article.description),
+      apiSource: 'GNews'
+    })) || [];
+  };
+
+  // MediaStack API (browser-friendly)
+  const fetchFromMediaStack = async () => {
+    if (!NEWS_APIS.mediastack || NEWS_APIS.mediastack === 'YOUR_MEDIASTACK_KEY_HERE') {
+      throw new Error('MediaStack key not configured');
+    }
+
+    const response = await fetch(
+      `http://api.mediastack.com/v1/news?access_key=${NEWS_APIS.mediastack}&keywords=Mithi River&languages=en&limit=10&sort=published_desc`
+    );
+    const data = await response.json();
+    
+    if (!response.ok || data.error) {
+      throw new Error(`MediaStack: ${data.error?.info || 'Failed to fetch'}`);
+    }
+    
+    return data.data?.map(article => ({
+      id: `mediastack-${article.url}`,
+      title: article.title,
+      description: article.description,
+      date: new Date(article.published_at).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      }),
+      source: article.source,
+      url: article.url,
+      imageUrl: article.image || 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+      category: categorizeArticle(article.title + ' ' + article.description),
+      apiSource: 'MediaStack'
+    })) || [];
+  };
+
+  const removeDuplicates = (articles) => {
+    const seen = new Set();
+    return articles.filter(article => {
+      const key = article.title.toLowerCase().trim();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const categorizeArticle = (text) => {
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes('pollution') || lowerText.includes('contamination')) return 'Alert';
+    if (lowerText.includes('conservation') || lowerText.includes('clean')) return 'Conservation';
+    if (lowerText.includes('technology') || lowerText.includes('innovation')) return 'Technology';
+    return 'Update';
+  };
+
+  const getFallbackNews = () => {
+    return [
+      {
+        id: 1,
+        title: "Mithi River Flooding Impact on Mumbai",
+        description: "Heavy monsoon rains cause Mithi River to overflow, affecting thousands of residents in low-lying areas.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "Times of India",
+        url: "https://timesofindia.indiatimes.com/city/mumbai",
+        imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
+        category: "Alert"
+      },
+      {
+        id: 2,
+        title: "BMC Launches Mithi River Cleaning Drive",
+        description: "Municipal corporation initiates comprehensive cleanup campaign to remove plastic waste and restore water quality along the 17.84 km stretch.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "Mumbai Mirror",
+        url: "https://mumbaimirror.indiatimes.com",
+        imageUrl: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=800",
+        category: "Conservation"
+      },
+      {
+        id: 3,
+        title: "Smart Sensors Monitor Mithi River Water Quality",
+        description: "IoT-enabled sensors deployed across 15 locations provide real-time data on pollution levels, pH, and dissolved oxygen in Mithi River.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "Indian Express",
+        url: "https://indianexpress.com",
+        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800",
+        category: "Technology"
+      },
+      {
+        id: 4,
+        title: "Mithi River Pollution Levels Exceed Safe Limits",
+        description: "Latest tests reveal BOD and COD levels far above permissible standards, raising concerns about ecosystem health and public safety.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "Hindustan Times",
+        url: "https://hindustantimes.com",
+        imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800",
+        category: "Alert"
+      },
+      {
+        id: 5,
+        title: "Community Groups Join Hands for Mithi River Revival",
+        description: "Local NGOs and resident associations collaborate on tree plantation and waste management initiatives along Mithi River banks.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "Mid-Day",
+        url: "https://mid-day.com",
+        imageUrl: "https://images.unsplash.com/photo-1569163139394-de4e5f43e4e3?w=800",
+        category: "Conservation"
+      },
+      {
+        id: 6,
+        title: "Mithi River: From Lifeline to Liability",
+        description: "Analysis of how rapid urbanization and industrial discharge transformed Mumbai's vital waterway into one of India's most polluted rivers.",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        source: "The Hindu",
+        url: "https://thehindu.com",
+        imageUrl: "https://images.unsplash.com/photo-1574263867128-a3d5c1b1deaa?w=800",
+        category: "Update",
+        apiSource: "Fallback"
+      }
+    ];
+  };
+
+  const getCategoryColor = (category) => {
+    switch(category) {
+      case 'Alert': return 'destructive';
+      case 'Conservation': return 'default';
+      case 'Technology': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg">Fetching news from multiple sources...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Mithi River News</h1>
+              <p className="text-gray-600">Latest updates from multiple news sources</p>
+              {lastUpdated && (
+                <p className="text-sm text-gray-500">Last updated: {lastUpdated.toLocaleTimeString()}</p>
+              )}
+            </div>
+            {/* Refresh News button removed as requested */}
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-yellow-800">Could not fetch live news</p>
+              <p className="text-sm text-yellow-700 mt-1">Error: {error}</p>
+              <p className="text-xs text-yellow-600 mt-2">💡 Showing fallback articles about Mithi River</p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => (
+            <Card key={article.id} className="overflow-hidden hover:shadow-xl transition-all">
+              <div className="aspect-video relative overflow-hidden">
+                <img 
+                  src={article.imageUrl} 
+                  alt={article.title}
+                  className="object-cover w-full h-full"
+                />
+                <Badge className="absolute top-3 right-3" variant={getCategoryColor(article.category)}>
+                  {article.category}
+                </Badge>
+                {article.apiSource && (
+                  <Badge className="absolute top-3 left-3 bg-blue-500 text-white">
+                    {article.apiSource}
+                  </Badge>
+                )}
+              </div>
+              
+              <CardHeader>
+                <CardTitle className="line-clamp-2 text-lg">{article.title}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-sm">
+                  <Calendar className="w-4 h-4" />
+                  <span>{article.date}</span>
+                  <span></span>
+                  <span>{article.source}</span>
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent>
+                <p className="text-gray-600 text-sm line-clamp-3 mb-4">{article.description}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => window.open(article.url, '_blank')}
+                >
+                  Read Full Article
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
