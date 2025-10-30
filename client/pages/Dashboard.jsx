@@ -388,27 +388,27 @@ const Dashboard = React.memo(({ demoMode = false }) => {
         </div>
       )}
 
-      <div className="relative z-10 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-[1600px] mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="text-6xl animate-bounce">🌊</div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+          <div className="text-center mb-6 sm:mb-8 lg:mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4">
+              <div className="text-4xl sm:text-5xl lg:text-6xl animate-bounce">🌊</div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent text-center">
                 Mithi River Water Quality Dashboard
               </h1>
             </div>
-            <p className="text-xl text-gray-600 mb-4">
+            <p className="text-sm sm:text-base lg:text-xl text-gray-600 mb-3 sm:mb-4">
               Real-time monitoring and analysis of water quality parameters
             </p>
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 shadow-lg">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">Live Data • {currentTime.toLocaleTimeString()}</span>
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 sm:px-6 py-1.5 sm:py-2 shadow-lg">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs sm:text-sm font-medium">Live Data • {currentTime.toLocaleTimeString()}</span>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 lg:mb-12">
             {stats.map((stat, index) => (
               <Card 
                 key={stat.title}
@@ -423,27 +423,27 @@ const Dashboard = React.memo(({ demoMode = false }) => {
                 {/* Animated Border */}
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 hover:animate-pulse" />
                 
-                <CardHeader className={`${stat.bgColor} border-b relative z-10`}>
-                  <CardTitle className="flex items-center justify-between text-gray-800">
-                    <span className="flex items-center gap-2">
-                      <span className="text-2xl animate-pulse">{stat.icon}</span>
-                      {stat.title}
+                <CardHeader className={`${stat.bgColor} border-b relative z-10 p-3 sm:p-4`}>
+                  <CardTitle className="flex items-center justify-between text-gray-800 text-sm sm:text-base">
+                    <span className="flex items-center gap-1 sm:gap-2">
+                      <span className="text-xl sm:text-2xl animate-pulse">{stat.icon}</span>
+                      <span className="text-xs sm:text-sm lg:text-base">{stat.title}</span>
                     </span>
-                    <div className="text-xs font-normal text-gray-500 bg-white/80 px-2 py-1 rounded-full">
+                    <div className="text-[10px] sm:text-xs font-normal text-gray-500 bg-white/80 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                       {stat.trend}
                     </div>
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="p-6 relative z-10">
-                  <div className="space-y-3">
-                    <div className={`text-4xl font-bold ${stat.textColor} animate-pulse`}>
+                <CardContent className="p-3 sm:p-4 lg:p-6 relative z-10">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${stat.textColor} animate-pulse`}>
                       {stat.value}
                     </div>
-                    <p className="text-gray-600 font-medium">{stat.status}</p>
+                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 font-medium">{stat.status}</p>
                     
                     {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 overflow-hidden">
                       <div 
                         className={`h-full bg-gradient-to-r ${stat.color} rounded-full transition-all duration-1000 animate-pulse`}
                         style={{ width: `${65 + (index * 5)}%` }}
@@ -456,29 +456,29 @@ const Dashboard = React.memo(({ demoMode = false }) => {
           </div>
 
           {/* Mithi River Charts and Analysis Section */}
-          <div className="space-y-8 mb-12">
+          <div className="space-y-6 sm:space-y-8 mb-8 lg:mb-12">
             {/* Section Header */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
-                <Droplets className="text-blue-600 animate-pulse" size={36} />
-                Mithi River Analysis Dashboard
-                <Activity className="text-green-600 animate-bounce" size={36} />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+                <Droplets className="text-blue-600 animate-pulse" size={24} />
+                <span>Mithi River Analysis Dashboard</span>
+                <Activity className="text-green-600 animate-bounce" size={24} />
               </h2>
-              <p className="text-gray-600 text-lg">Real-time water quality trends and comprehensive analysis</p>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600">Real-time water quality trends and comprehensive analysis</p>
             </div>
 
             {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {/* Water Quality Trends Chart */}
               <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
-                  <CardTitle className="flex items-center gap-3">
-                    <TrendingUp size={24} />
-                    Water Quality Trends (Last 7 Days)
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base lg:text-lg">
+                    <TrendingUp size={20} className="sm:w-6 sm:h-6" />
+                    <span>Water Quality Trends (Last 7 Days)</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <ResponsiveContainer width="100%" height={250} className="sm:h-[280px] lg:h-[300px]">
                     <LineChart data={mithiTrendData}>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                       <XAxis dataKey="day" />
@@ -520,14 +520,14 @@ const Dashboard = React.memo(({ demoMode = false }) => {
 
               {/* Water Quality Distribution */}
               <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-                  <CardTitle className="flex items-center gap-3">
-                    <Activity size={24} />
-                    Parameter Distribution
+                <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base lg:text-lg">
+                    <Activity size={20} className="sm:w-6 sm:h-6" />
+                    <span>Parameter Distribution</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <ResponsiveContainer width="100%" height={250} className="sm:h-[280px] lg:h-[300px]">
                     <PieChart>
                       <Pie
                         data={parameterDistribution}
@@ -551,14 +551,14 @@ const Dashboard = React.memo(({ demoMode = false }) => {
 
               {/* Monthly Comparison Bar Chart */}
               <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="bg-gradient-to-r from-teal-600 to-green-600 text-white">
-                  <CardTitle className="flex items-center gap-3">
-                    <TrendingUp size={24} />
-                    Monthly WQI Comparison
+                <CardHeader className="bg-gradient-to-r from-teal-600 to-green-600 text-white p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base lg:text-lg">
+                    <TrendingUp size={20} className="sm:w-6 sm:h-6" />
+                    <span>Monthly WQI Comparison</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <ResponsiveContainer width="100%" height={250} className="sm:h-[280px] lg:h-[300px]">
                     <BarChart data={monthlyData}>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                       <XAxis dataKey="month" />
@@ -589,14 +589,14 @@ const Dashboard = React.memo(({ demoMode = false }) => {
 
               {/* Area Chart for Pollution Levels */}
               <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-xl">
-                <CardHeader className="bg-gradient-to-r from-red-600 to-orange-600 text-white">
-                  <CardTitle className="flex items-center gap-3">
-                    <AlertTriangle size={24} />
-                    Pollution Level Analysis
+                <CardHeader className="bg-gradient-to-r from-red-600 to-orange-600 text-white p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base lg:text-lg">
+                    <AlertTriangle size={20} className="sm:w-6 sm:h-6" />
+                    <span>Pollution Level Analysis</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <ResponsiveContainer width="100%" height={250} className="sm:h-[280px] lg:h-[300px]">
                     <AreaChart data={pollutionData}>
                       <defs>
                         <linearGradient id="pollutionGradient" x1="0" y1="0" x2="0" y2="1">
