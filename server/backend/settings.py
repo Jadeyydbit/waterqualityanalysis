@@ -105,22 +105,34 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# Load environment variables
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# PostgreSQL Configuration (Production-ready)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'waterqualitydb'),
+        'USER': os.getenv('POSTGRES_USER', 'waterquality_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'your_secure_password_here'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'OPTIONS': {
+            'connect_timeout': 60,
+        },
     }
 }
 
-# Uncomment below to use PostgreSQL in production
+# SQLite fallback configuration (for development/backup)
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'waterquality',
-#         'USER': 'postgres',
-#         'PASSWORD': 'jaden_10xd',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
 
@@ -132,9 +144,13 @@ if 'runserver' in sys.argv:
     db_conn = connections['default']
     try:
         db_conn.cursor()
-        print('\nSQLite database connected successfully.')
-    except OperationalError:
-        print('\nFailed to connect to SQLite database.')
+        print('\nPostgreSQL database connected successfully.')
+        print(f'Database: {DATABASES["default"]["NAME"]}')
+        print(f'User: {DATABASES["default"]["USER"]}')
+        print(f'Host: {DATABASES["default"]["HOST"]}:{DATABASES["default"]["PORT"]}')
+    except OperationalError as e:
+        print(f'\nFailed to connect to PostgreSQL database: {e}')
+        print('Please ensure PostgreSQL is running and credentials are correct.')
     print('Backend running!')
 
 

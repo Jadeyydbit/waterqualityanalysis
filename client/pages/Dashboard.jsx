@@ -9,11 +9,44 @@ import { sampleData, debounce } from "@/lib/performance";
 const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [waterDrops, setWaterDrops] = useState([]);
+  const [realData, setRealData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Demo mode alert function
   const showDemoAlert = () => {
     alert("🔐 Please register to access full features and functionality. This is a demo version with limited access.");
   };
+
+  // Fetch real data from Django API
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/dashboard/stats/');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Real data fetched:', data);
+        setRealData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch real dashboard data:', err);
+        setError(err.message);
+        // Fall back to static data if API fails
+        setRealData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRealData();
+    
+    // Refresh data every 30 seconds to simulate real-time updates
+    const interval = setInterval(fetchRealData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // Update time every second
@@ -31,79 +64,180 @@ const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
     return () => clearInterval(timer);
   }, []);
 
-  const stats = [
-    {
-      title: "Water Quality Index",
-      value: "85",
-      status: "Good Quality",
-      icon: "🌊",
-      color: "from-blue-500 to-cyan-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
-      trend: "+2.3%"
-    },
-    {
-      title: "pH Level",
-      value: "7.2",
-      status: "Normal Range",
-      icon: "⚗️",
-      color: "from-green-500 to-emerald-600",
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-      trend: "Stable"
-    },
-    {
-      title: "Temperature",
-      value: "24°C",
-      status: "Optimal",
-      icon: "🌡️",
-      color: "from-orange-500 to-red-500",
-      bgColor: "bg-orange-50",
-      textColor: "text-orange-600",
-      trend: "-0.5°C"
-    },
-    {
-      title: "Dissolved Oxygen",
-      value: "8.5",
-      status: "Excellent",
-      icon: "💨",
-      color: "from-purple-500 to-pink-600",
-      bgColor: "bg-purple-50",
-      textColor: "text-purple-600",
-      trend: "+1.2mg/L"
-    },
-    {
-      title: "Total Dissolved Solids",
-      value: "245",
-      status: "Good",
-      icon: "🔬",
-      color: "from-teal-500 to-blue-600",
-      bgColor: "bg-teal-50",
-      textColor: "text-teal-600",
-      trend: "-15ppm"
-    },
-    {
-      title: "Turbidity",
-      value: "3.2",
-      status: "Clear",
-      icon: "✨",
-      color: "from-indigo-500 to-purple-600",
-      bgColor: "bg-indigo-50",
-      textColor: "text-indigo-600",
-      trend: "Improved"
+  // Use real data if available, otherwise fall back to static data
+  const stats = useMemo(() => {
+    if (realData && realData.success && realData.current_stats) {
+      const data = realData.current_stats;
+      return [
+        {
+          title: "Water Quality Index",
+          value: data.water_quality_index?.value || "Poor",
+          status: `${data.water_quality_index?.samples || 0} samples`,
+          icon: "🌊",
+          color: data.water_quality_index?.value === 'Good' ? "from-green-500 to-emerald-600" : 
+                 data.water_quality_index?.value === 'Moderate' ? "from-blue-500 to-cyan-600" : "from-red-500 to-orange-600",
+          bgColor: data.water_quality_index?.value === 'Good' ? "bg-green-50" : 
+                   data.water_quality_index?.value === 'Moderate' ? "bg-blue-50" : "bg-red-50",
+          textColor: data.water_quality_index?.value === 'Good' ? "text-green-600" : 
+                     data.water_quality_index?.value === 'Moderate' ? "text-blue-600" : "text-red-600",
+          trend: `${realData.dataset_info?.latest_year || 2024} data`
+        },
+        {
+          title: "pH Level",
+          value: data.ph?.value || "7.0",
+          status: data.ph?.status?.message || "Normal Range",
+          icon: "⚗️",
+          color: data.ph?.status?.color === 'green' ? "from-green-500 to-emerald-600" : 
+                 data.ph?.status?.color === 'blue' ? "from-blue-500 to-cyan-600" : 
+                 data.ph?.status?.color === 'orange' ? "from-orange-500 to-yellow-600" : "from-red-500 to-orange-600",
+          bgColor: data.ph?.status?.color === 'green' ? "bg-green-50" : 
+                   data.ph?.status?.color === 'blue' ? "bg-blue-50" : 
+                   data.ph?.status?.color === 'orange' ? "bg-orange-50" : "bg-red-50",
+          textColor: data.ph?.status?.color === 'green' ? "text-green-600" : 
+                     data.ph?.status?.color === 'blue' ? "text-blue-600" : 
+                     data.ph?.status?.color === 'orange' ? "text-orange-600" : "text-red-600",
+          trend: `Range: ${data.ph?.min}-${data.ph?.max}`
+        },
+        {
+          title: "Temperature",
+          value: `${data.temperature?.value || 25}°C`,
+          status: data.temperature?.status?.message || "Optimal",
+          icon: "🌡️",
+          color: data.temperature?.status?.color === 'green' ? "from-orange-500 to-red-500" : 
+                 data.temperature?.status?.color === 'blue' ? "from-blue-500 to-cyan-600" : "from-orange-500 to-red-500",
+          bgColor: data.temperature?.status?.color === 'green' ? "bg-orange-50" : 
+                   data.temperature?.status?.color === 'blue' ? "bg-blue-50" : "bg-orange-50",
+          textColor: data.temperature?.status?.color === 'green' ? "text-orange-600" : 
+                     data.temperature?.status?.color === 'blue' ? "text-blue-600" : "text-orange-600",
+          trend: `${data.temperature?.min}°C - ${data.temperature?.max}°C`
+        },
+        {
+          title: "Dissolved Oxygen",
+          value: `${data.dissolved_oxygen?.value || 5.5}`,
+          status: data.dissolved_oxygen?.status?.message || "Good",
+          icon: "💨",
+          color: data.dissolved_oxygen?.status?.color === 'green' ? "from-purple-500 to-pink-600" : 
+                 data.dissolved_oxygen?.status?.color === 'blue' ? "from-blue-500 to-purple-600" : "from-red-500 to-orange-600",
+          bgColor: data.dissolved_oxygen?.status?.color === 'green' ? "bg-purple-50" : 
+                   data.dissolved_oxygen?.status?.color === 'blue' ? "bg-blue-50" : "bg-red-50",
+          textColor: data.dissolved_oxygen?.status?.color === 'green' ? "text-purple-600" : 
+                     data.dissolved_oxygen?.status?.color === 'blue' ? "text-blue-600" : "text-red-600",
+          trend: `${data.dissolved_oxygen?.min}-${data.dissolved_oxygen?.max} mg/L`
+        },
+        {
+          title: "Total Dissolved Solids",
+          value: `${data.tds?.value || 2500}`,
+          status: data.tds?.status?.message || "Poor",
+          icon: "🔬",
+          color: data.tds?.status?.color === 'green' ? "from-teal-500 to-blue-600" : 
+                 data.tds?.status?.color === 'blue' ? "from-blue-500 to-teal-600" : 
+                 data.tds?.status?.color === 'orange' ? "from-orange-500 to-yellow-600" : "from-red-500 to-pink-600",
+          bgColor: data.tds?.status?.color === 'green' ? "bg-teal-50" : 
+                   data.tds?.status?.color === 'blue' ? "bg-blue-50" : 
+                   data.tds?.status?.color === 'orange' ? "bg-orange-50" : "bg-red-50",
+          textColor: data.tds?.status?.color === 'green' ? "text-teal-600" : 
+                     data.tds?.status?.color === 'blue' ? "text-blue-600" : 
+                     data.tds?.status?.color === 'orange' ? "text-orange-600" : "text-red-600",
+          trend: `${data.tds?.min}-${data.tds?.max} ppm`
+        },
+        {
+          title: "BOD Level",
+          value: `${data.bod?.value || 10.5}`,
+          status: data.bod?.status?.message || "High",
+          icon: "✨",
+          color: data.bod?.status?.color === 'green' ? "from-indigo-500 to-purple-600" : 
+                 data.bod?.status?.color === 'blue' ? "from-blue-500 to-indigo-600" : "from-red-500 to-orange-600",
+          bgColor: data.bod?.status?.color === 'green' ? "bg-indigo-50" : 
+                   data.bod?.status?.color === 'blue' ? "bg-blue-50" : "bg-red-50",
+          textColor: data.bod?.status?.color === 'green' ? "text-indigo-600" : 
+                     data.bod?.status?.color === 'blue' ? "text-blue-600" : "text-red-600",
+          trend: `${data.bod?.min}-${data.bod?.max} mg/L`
+        }
+      ];
     }
-  ];
+    
+    // Fallback static data
+    return [
+      {
+        title: "Water Quality Index",
+        value: "85",
+        status: "Good Quality",
+        icon: "🌊",
+        color: "from-blue-500 to-cyan-600",
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-600",
+        trend: "+2.3%"
+      },
+      {
+        title: "pH Level",
+        value: "7.2",
+        status: "Normal Range",
+        icon: "⚗️",
+        color: "from-green-500 to-emerald-600",
+        bgColor: "bg-green-50",
+        textColor: "text-green-600",
+        trend: "Stable"
+      },
+      {
+        title: "Temperature",
+        value: "24°C",
+        status: "Optimal",
+        icon: "🌡️",
+        color: "from-orange-500 to-red-500",
+        bgColor: "bg-orange-50",
+        textColor: "text-orange-600",
+        trend: "-0.5°C"
+      },
+      {
+        title: "Dissolved Oxygen",
+        value: "8.5",
+        status: "Excellent",
+        icon: "💨",
+        color: "from-purple-500 to-pink-600",
+        bgColor: "bg-purple-50",
+        textColor: "text-purple-600",
+        trend: "+1.2mg/L"
+      },
+      {
+        title: "Total Dissolved Solids",
+        value: "245",
+        status: "Good",
+        icon: "🔬",
+        color: "from-teal-500 to-blue-600",
+        bgColor: "bg-teal-50",
+        textColor: "text-teal-600",
+        trend: "-15ppm"
+      },
+      {
+        title: "BOD Level",
+        value: "3.2",
+        status: "Clear",
+        icon: "✨",
+        color: "from-indigo-500 to-purple-600",
+        bgColor: "bg-indigo-50",
+        textColor: "text-indigo-600",
+        trend: "Improved"
+      }
+    ];
+  }, [realData]);
 
-  // Memoized data generation for better performance
-  const mithiTrendData = useMemo(() => [
-    { day: 'Mon', wqi: 68, pH: 7.2, DO: 6.8, temp: 24 },
-    { day: 'Tue', wqi: 72, pH: 7.4, DO: 7.1, temp: 25 },
-    { day: 'Wed', wqi: 69, pH: 7.1, DO: 6.9, temp: 23 },
-    { day: 'Thu', wqi: 75, pH: 7.6, DO: 7.4, temp: 26 },
-    { day: 'Fri', wqi: 71, pH: 7.3, DO: 7.0, temp: 24 },
-    { day: 'Sat', wqi: 78, pH: 7.8, DO: 7.8, temp: 27 },
-    { day: 'Sun', wqi: 74, pH: 7.5, DO: 7.2, temp: 25 }
-  ], []);
+  // Memoized data generation for better performance - use real data if available
+  const mithiTrendData = useMemo(() => {
+    if (realData && realData.success && realData.trend_data) {
+      return realData.trend_data;
+    }
+    
+    // Fallback static data
+    return [
+      { day: 'Mon', wqi: 68, pH: 7.2, DO: 6.8, temp: 24 },
+      { day: 'Tue', wqi: 72, pH: 7.4, DO: 7.1, temp: 25 },
+      { day: 'Wed', wqi: 69, pH: 7.1, DO: 6.9, temp: 23 },
+      { day: 'Thu', wqi: 75, pH: 7.6, DO: 7.4, temp: 26 },
+      { day: 'Fri', wqi: 71, pH: 7.3, DO: 7.0, temp: 24 },
+      { day: 'Sat', wqi: 78, pH: 7.8, DO: 7.8, temp: 27 },
+      { day: 'Sun', wqi: 74, pH: 7.5, DO: 7.2, temp: 25 }
+    ];
+  }, [realData]);
 
   const parameterDistribution = useMemo(() => [
     { name: 'Good Quality', value: 45 },
@@ -127,14 +261,32 @@ const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
     { month: 'Dec', wqi: 75 }
   ], []);
 
-  const pollutionData = useMemo(() => [
-    { location: 'Upstream', pollutionLevel: 35 },
-    { location: 'Industrial Zone', pollutionLevel: 78 },
-    { location: 'Residential Area', pollutionLevel: 52 },
-    { location: 'Treatment Plant', pollutionLevel: 28 },
-    { location: 'Downstream', pollutionLevel: 45 },
-    { location: 'Estuary', pollutionLevel: 38 }
-  ], []);
+  const pollutionData = useMemo(() => {
+    if (realData && realData.success && realData.location_data) {
+      return realData.location_data.map(item => ({
+        location: item.location,
+        pollutionLevel: Math.round((item.avg_bod + item.avg_cod/5)),
+        samples: item.samples,
+        wqi: item.wqi,
+        temperature: item.avg_temp,
+        ph: item.avg_ph,
+        do: item.avg_do,
+        tds: item.avg_tds,
+        bod: item.avg_bod,
+        cod: item.avg_cod
+      }));
+    }
+    
+    // Fallback static data
+    return [
+      { location: 'Upstream', pollutionLevel: 35 },
+      { location: 'Industrial Zone', pollutionLevel: 78 },
+      { location: 'Residential Area', pollutionLevel: 52 },
+      { location: 'Treatment Plant', pollutionLevel: 28 },
+      { location: 'Downstream', pollutionLevel: 45 },
+      { location: 'Estuary', pollutionLevel: 38 }
+    ];
+  }, [realData]);
 
   const getParameterColor = (index) => {
     const colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -155,6 +307,22 @@ const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
             <Link to="/register" className="ml-4 bg-white text-orange-600 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors">
               Register Now
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Data Source Indicator */}
+      {!loading && (
+        <div className={`text-center p-2 text-sm ${realData ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+          <div className="flex items-center justify-center gap-2">
+            <span>{realData ? '📊' : '⚠️'}</span>
+            <span className="font-medium">
+              {realData && realData.success ? 
+                `Real Data: ${realData.data_source} (${realData.dataset_info?.total_records?.toLocaleString()} records, ${realData.dataset_info?.year_range}) - Updated: ${new Date(realData.timestamp).toLocaleTimeString()}` :
+                'Using Static Demo Data - Real data not available'
+              }
+            </span>
+            {error && <span className="text-red-600 ml-2">(API Error: {error})</span>}
           </div>
         </div>
       )}
@@ -208,6 +376,17 @@ const Dashboard = React.memo(function Dashboard({ demoMode = false }) {
           ))}
         </div>
       </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading Real Water Quality Data...</p>
+            <p className="text-sm text-gray-500 mt-2">Fetching from Mithi River Dataset</p>
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 p-8">
         <div className="max-w-7xl mx-auto">

@@ -82,6 +82,7 @@ export default function Login() {
     setLoading(true);
 
     try {
+<<<<<<< HEAD
       // First, check if it's a predefined admin account
       const adminAccount = checkAdminCredentials(username, password);
       
@@ -102,6 +103,9 @@ export default function Login() {
       }
 
       // If not admin, try regular user login via API
+=======
+      // First try API authentication
+>>>>>>> 1bd33e6a0f0835d3aaf766929273d63a16324659
       const response = await fetch('/api/login/', {
         method: 'POST',
         headers: {
@@ -116,13 +120,32 @@ export default function Login() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', 'user'); // Regular user role
         localStorage.setItem('user', JSON.stringify(data.user));
-        toast.success("Welcome back! Successfully logged in.");
+        toast.success("Welcome back! Successfully logged in via API.");
         navigate('/dashboard');
+        return;
       } else {
         toast.error(data.message || "Invalid credentials. Please try again.");
+        return;
       }
     } catch (error) {
-      toast.error("Connection error. Please check your network and try again.");
+      // Fallback to local admin check when API is not available
+      console.log("API not available, using local authentication fallback");
+      
+      const adminUser = checkAdminCredentials(username, password);
+      
+      if (adminUser) {
+        // Create a mock token and store user info
+        const mockToken = `offline_token_${adminUser.username}_${Date.now()}`;
+        const userInfo = { ...adminUser };
+        delete userInfo.password; // Remove password from stored info
+        
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(userInfo));
+        toast.success(`Welcome back, ${adminUser.name}! (Offline mode)`);
+        navigate('/dashboard');
+      } else {
+        toast.error("Invalid credentials. Please check your username and password.");
+      }
     } finally {
       setLoading(false);
     }

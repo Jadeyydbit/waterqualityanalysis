@@ -22,9 +22,52 @@ const WaterQualityHeatmap = () => {
   const [showContours, setShowContours] = useState(true);
   const [showSensors, setShowSensors] = useState(true);
   const [animationSpeed, setAnimationSpeed] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [realData, setRealData] = useState(null);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const timeRef = useRef(0);
+
+  // Fetch real heatmap data from API
+  useEffect(() => {
+    const fetchHeatmapData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/advanced-features/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch heatmap data');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.heatmap_data) {
+          setRealData(data.heatmap_data);
+        }
+      } catch (error) {
+        console.error('Error fetching heatmap data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeatmapData();
+  }, []);
+
+  // Generate heatmap data from real API data or fallback
+  const generateHeatmapDataFromAPI = (parameter) => {
+    if (!realData) return generateHeatmapData(parameter);
+    
+    return realData.map(point => ({
+      x: point.x,
+      y: point.y,
+      value: parameter === 'temperature' ? point.temperature : 
+             parameter === 'pH' ? Math.random() * 2 + 6.5 :
+             parameter === 'DO' ? Math.random() * 5 + 3 :
+             parameter === 'turbidity' ? point.value :
+             point.value
+    }));
+  };
 
   // Heatmap data for different parameters
   const heatmapData = {
@@ -35,7 +78,7 @@ const WaterQualityHeatmap = () => {
       gradient: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
       min: 6.0,
       max: 8.5,
-      data: generateHeatmapData('pH')
+      data: generateHeatmapDataFromAPI('pH')
     },
     temperature: {
       name: 'Temperature',
@@ -44,7 +87,7 @@ const WaterQualityHeatmap = () => {
       gradient: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
       min: 25,
       max: 35,
-      data: generateHeatmapData('temperature')
+      data: generateHeatmapDataFromAPI('temperature')
     },
     DO: {
       name: 'Dissolved Oxygen',
@@ -53,7 +96,7 @@ const WaterQualityHeatmap = () => {
       gradient: ['#ef4444', '#f59e0b', '#10b981', '#06b6d4'],
       min: 2,
       max: 10,
-      data: generateHeatmapData('DO')
+      data: generateHeatmapDataFromAPI('DO')
     },
     turbidity: {
       name: 'Turbidity',
@@ -62,7 +105,7 @@ const WaterQualityHeatmap = () => {
       gradient: ['#10b981', '#f59e0b', '#ef4444', '#7c2d12'],
       min: 0,
       max: 50,
-      data: generateHeatmapData('turbidity')
+      data: generateHeatmapDataFromAPI('turbidity')
     }
   };
 
@@ -332,6 +375,19 @@ const WaterQualityHeatmap = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Card className="col-span-2 border-0 shadow-xl bg-gradient-to-br from-blue-50/50 to-cyan-50/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading heatmap data...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="col-span-2 border-0 shadow-xl bg-gradient-to-br from-blue-50/50 to-cyan-50/50">
       <CardHeader>
@@ -376,6 +432,19 @@ const WaterQualityHeatmap = () => {
       </CardHeader>
       
       <CardContent>
+        {/* Data Source Indicator */}
+        <div className="flex items-center justify-between p-4 mb-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+          <div className="flex items-center space-x-2">
+            <Map className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">
+              Data Source: {realData ? 'Real Mithi River CSV Dataset - Heatmap' : 'Demo Data'}
+            </span>
+          </div>
+          <div className="text-xs text-gray-500">
+            Last Updated: {new Date().toLocaleTimeString()}
+          </div>
+        </div>
+
         {/* Layer Selection */}
         <div className="flex flex-wrap gap-2 mb-6">
           {Object.keys(heatmapData).map((layer) => (

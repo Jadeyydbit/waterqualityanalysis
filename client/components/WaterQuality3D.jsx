@@ -19,64 +19,114 @@ const WaterQuality3D = () => {
   const [isAnimating, setIsAnimating] = useState(true);
   const [selectedParameter, setSelectedParameter] = useState('pH');
   const [currentTime, setCurrentTime] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [realData, setRealData] = useState(null);
   const canvasRef = useRef(null);
 
-  // Mock 3D water quality data
-  const waterQualityData = {
-    pH: {
-      current: 7.2,
-      safe: [6.5, 8.5],
-      color: '#3b82f6',
-      trend: 'stable',
-      data: Array.from({length: 20}, (_, i) => ({
+  // Fetch real 3D visualization data from API
+  useEffect(() => {
+    const fetch3DData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/3d-visualization/');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch 3D data');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setRealData(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching 3D data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetch3DData();
+  }, []);
+
+  // Generate 3D data from API or use fallback
+  const generate3DDataFromAPI = (parameter) => {
+    if (!realData || realData.length === 0) {
+      // Fallback data
+      return Array.from({length: 20}, (_, i) => ({
         x: i * 5,
         y: Math.sin(i * 0.3) * 2 + 7.2,
         z: Math.cos(i * 0.2) * 1.5 + 5
-      }))
+      }));
+    }
+
+    return realData.slice(0, 20).map((point, i) => ({
+      x: point.x * 10, // Scale for visualization
+      y: parameter === 'pH' ? point.ph : 
+         parameter === 'DO' ? point.do : 
+         parameter === 'BOD' ? point.bod : 
+         parameter === 'COD' ? point.cod : 
+         parameter === 'temperature' ? point.temperature : 
+         point.value || 7.2,
+      z: point.z * 2
+    }));
+  };
+
+  // Calculate current values from real data
+  const getCurrentValue = (parameter) => {
+    if (!realData || realData.length === 0) {
+      const defaults = { pH: 7.2, DO: 6.8, BOD: 3.2, COD: 45, temperature: 28.5 };
+      return defaults[parameter] || 7.2;
+    }
+
+    const values = realData.map(point => 
+      parameter === 'pH' ? point.ph : 
+      parameter === 'DO' ? point.do : 
+      parameter === 'BOD' ? point.bod : 
+      parameter === 'COD' ? point.cod : 
+      parameter === 'temperature' ? point.temperature : 
+      point.value || 7.2
+    ).filter(v => v != null);
+    
+    return values.length > 0 ? values.reduce((a, b) => a + b) / values.length : 7.2;
+  };
+
+  // Mock 3D water quality data (now using real data when available)
+  const waterQualityData = {
+    pH: {
+      current: getCurrentValue('pH'),
+      safe: [6.5, 8.5],
+      color: '#3b82f6',
+      trend: 'stable',
+      data: generate3DDataFromAPI('pH')
     },
     DO: {
-      current: 6.8,
+      current: getCurrentValue('DO'),
       safe: [5.0, 14.0],
       color: '#10b981',
       trend: 'improving',
-      data: Array.from({length: 20}, (_, i) => ({
-        x: i * 5,
-        y: Math.sin(i * 0.4) * 1.5 + 6.8,
-        z: Math.cos(i * 0.3) * 2 + 4
-      }))
+      data: generate3DDataFromAPI('DO')
     },
     BOD: {
-      current: 3.2,
+      current: getCurrentValue('BOD'),
       safe: [0, 3.0],
       color: '#f59e0b',
       trend: 'critical',
-      data: Array.from({length: 20}, (_, i) => ({
-        x: i * 5,
-        y: Math.sin(i * 0.5) * 1 + 3.2,
-        z: Math.cos(i * 0.4) * 1.8 + 3
-      }))
+      data: generate3DDataFromAPI('BOD')
     },
     COD: {
-      current: 25.5,
+      current: getCurrentValue('COD'),
       safe: [0, 20.0],
       color: '#ef4444',
       trend: 'declining',
-      data: Array.from({length: 20}, (_, i) => ({
-        x: i * 5,
-        y: Math.sin(i * 0.6) * 3 + 25.5,
-        z: Math.cos(i * 0.5) * 2.2 + 6
-      }))
+      data: generate3DDataFromAPI('COD')
     },
-    Temperature: {
-      current: 28.5,
+    temperature: {
+      current: getCurrentValue('temperature'),
       safe: [20, 35],
       color: '#8b5cf6',
       trend: 'stable',
-      data: Array.from({length: 20}, (_, i) => ({
-        x: i * 5,
-        y: Math.sin(i * 0.35) * 2.5 + 28.5,
-        z: Math.cos(i * 0.25) * 1.8 + 7
-      }))
+      data: generate3DDataFromAPI('temperature')
     }
   };
 
@@ -187,6 +237,19 @@ const WaterQuality3D = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Card className="col-span-2 border-0 shadow-xl bg-gradient-to-br from-blue-50/50 to-cyan-50/50 backdrop-blur-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading 3D visualization data...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="col-span-2 border-0 shadow-xl bg-gradient-to-br from-blue-50/50 to-cyan-50/50 backdrop-blur-sm">
       <CardHeader className="pb-4">
@@ -221,6 +284,19 @@ const WaterQuality3D = () => {
       </CardHeader>
       
       <CardContent>
+        {/* Data Source Indicator */}
+        <div className="flex items-center justify-between p-4 mb-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">
+              Data Source: {realData ? 'Real Mithi River CSV Dataset - 3D Visualization' : 'Demo Data'}
+            </span>
+          </div>
+          <div className="text-xs text-gray-500">
+            Last Updated: {new Date().toLocaleTimeString()}
+          </div>
+        </div>
+
         {/* Parameter Selection */}
         <div className="flex flex-wrap gap-2 mb-6">
           {Object.keys(waterQualityData).map((param) => (
