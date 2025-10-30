@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Brain, TrendingUp, AlertTriangle, CheckCircle, Activity, Target, Zap, Eye } from 'lucide-react';
+import FastAgent from "@/components/FastAgent";
 
 const AIAnalytics = React.memo(() => {
   const [aiData, setAiData] = useState(null);
@@ -1049,5 +1050,32 @@ const AIAnalytics = React.memo(() => {
 });
 
 AIAnalytics.displayName = 'AIAnalytics';
+
+            {/* Fast Agent Panel */}
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-xl lg:col-span-2">
+              <CardHeader className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">💬</span>
+                  Ask the Fast Agent
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <FastAgent
+                  waterQualityData={(() => {
+                    const last = Array.isArray(aiData?.forecasts) && aiData.forecasts.length
+                      ? aiData.forecasts[aiData.forecasts.length - 1]
+                      : {};
+                    return {
+                      wqi: last?.predicted_wqi ?? null,
+                      ph: last?.predicted_ph ?? null,
+                      do: last?.predicted_do ?? null,
+                      temperature: last?.predicted_temp ?? null,
+                      alerts: aiData?.anomalies ?? [],
+                      timestamp: last?.date ?? new Date().toISOString(),
+                    };
+                  })()}
+                />
+              </CardContent>
+            </Card>
 
 export default AIAnalytics;
